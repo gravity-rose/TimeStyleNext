@@ -51,7 +51,7 @@ Report issues at: https://github.com/gravity-rose/TimeStyleNext/issues
 
 ## License
 
-MIT License -- see [LICENSE](LICENSE).
+Dual licensed. Original code from freakified/plarus retains the **MIT License**. New and modified code in this fork is licensed under **CC BY-NC-SA 4.0**. See [LICENSE](LICENSE) for details. Individual source files carry SPDX headers indicating which license(s) apply.
 
 ## Credits
 

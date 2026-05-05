@@ -1,4 +1,6 @@
-﻿#include <pebble.h>
+﻿// SPDX-License-Identifier: MIT AND CC-BY-NC-SA-4.0
+// Original: MIT (freakified/plarus)  Modifications: CC-BY-NC-SA-4.0 (gravity-rose)
+#include <pebble.h>
 #include <pebble-fctx/fctx.h>
 #include <pebble-fctx/ffont.h>
 #include "clock_area.h"

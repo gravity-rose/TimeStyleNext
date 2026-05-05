@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT AND CC-BY-NC-SA-4.0
+# Original: MIT (freakified/plarus)  Modifications: CC-BY-NC-SA-4.0 (gravity-rose)
 #
 # This file is the default set of rules to compile a Pebble application.
 #

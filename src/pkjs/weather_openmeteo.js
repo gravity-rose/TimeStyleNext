@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT AND CC-BY-NC-SA-4.0
+// Original: MIT (freakified/plarus)  Modifications: CC-BY-NC-SA-4.0 (gravity-rose)
 var weatherCommon = require('./weather');
 
 module.exports.getWeatherFromCoords = getWeatherFromCoords;

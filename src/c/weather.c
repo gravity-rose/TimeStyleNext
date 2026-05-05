@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT AND CC-BY-NC-SA-4.0
+// Original: MIT (freakified/plarus)  Modifications: CC-BY-NC-SA-4.0 (gravity-rose)
 #include <pebble.h>
 #include "weather.h"
 #include "settings.h"
