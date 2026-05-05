@@ -47,7 +47,7 @@ pebble install --emulator basalt
 
 ## Issues
 
-Report issues at: https://github.com/gravity-rose/TimeStyleBBNext/issues
+Report issues at: https://github.com/gravity-rose/TimeStyleNext/issues
 
 ## License
 
