@@ -1,28 +1,61 @@
-# TimeStyleBB
-A stylish, modern watchface for the Pebble and Pebble Time watches.
+# TimeStyle Next
 
-This project is a fork of [freakified/TimeStylePebble](https://github.com/freakified/TimeStylePebble).
-In addition to the original version this version add various corrections and a bottom/top bar possibility that can display up to four widgets.
+A stylish, modern watchface for Pebble watches, updated for the Rebble era.
 
-<img src="project_banner.gif" width="400" height="300">
+TimeStyle Next is a fork of [plarus/TimeStyleBBPebble](https://github.com/plarus/TimeStyleBBPebble), which itself forked from [freakified/TimeStylePebble](https://github.com/freakified/TimeStylePebble). This version adds new features, broader platform support, and upstream improvements.
 
-Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle is designed as the “present” to complement the Timeline’s “past” and “future”.
+## What's New in 2.0
 
-* Readable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.
-* Colorful: includes over 20 preset color schemes, and also supports custom colors using any color the Pebble Time can display&mdash;also supports saving, loading, and sharing custom presets!
-* Configurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.
-* Keeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.
-* Works in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.
+- **Next Appointment Bar** -- When the widget bar is horizontal (top or bottom), an optional compact bar on the opposite side shows your next calendar appointment with an alert/reminder. Configurable via the settings page.
+- **Open-Meteo Weather** -- Replaced OpenWeatherMap and Weather Underground with [Open-Meteo](https://open-meteo.com/), a free weather API that requires no API key.
+- **UV Index Widget** -- New widget type showing the current UV index from Open-Meteo.
+- **Pebble Clay Config** -- Settings page is now built with the Clay framework, self-contained in the app (no external HTML dependency).
+- **Flint & Gabbro Support** -- Added support for the Flint (144x168, B&W) and Gabbro (260x260, round, color) platforms.
+- **Emery Proper Sizing** -- Proportionally scaled widget bar and dynamic sidebar width for the Emery display (200x228).
+- **Alt Timezone Fix** -- Alt timezone offset now correctly normalizes to UTC before applying the offset, fixing incorrect times in non-UTC locales.
+- **Settings Refactor** -- Cleaner separation of persisted and runtime-computed settings, with size safety checks.
+- **B&W Display Fix** -- White bars with black text on B&W platforms (Diorite, Flint) instead of dithered gray.
 
-## Want to try it?
-* Download on the Pebble store at the link below: https://apps.rebble.io/en_US/application/5a48b54f0dfc32823d0041d5?query=timestylr&section=watchfaces
-* Or download the lastest PBW package here: https://github.com/plarus/TimeStyleBBPebble/releases
+## Supported Platforms
+
+| Platform | Resolution | Display | Shape |
+|----------|-----------|---------|-------|
+| Basalt | 144x168 | Color | Rectangular |
+| Chalk | 180x180 | Color | Round |
+| Diorite | 144x168 | B&W | Rectangular |
+| Emery | 200x228 | Color | Rectangular |
+| Flint | 144x168 | B&W | Rectangular |
+| Gabbro | 260x260 | Color | Round |
+
+## Features
+
+- **Readable** -- Over 80% of the display devoted to time, with 6 font options and antialiased text rendering via FCTX.
+- **Configurable Sidebar** -- Position the widget bar on any edge (top, bottom, left, right) or hide it. Up to 4 widgets in horizontal mode, 3 in vertical.
+- **16 Widget Types** -- Battery, weather (current and forecast), UV index, date, seconds, week number, alt timezone, steps, distance, sleep, heart rate, Swatch beats, and more.
+- **Next Appointment** -- Optional compact bar showing your next calendar event (horizontal bar modes only).
+- **Auto-Notifications** -- Automatic battery warning at low charge, optional disconnect vibration and icon.
+- **38 Languages** -- English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latvian, Ukrainian, Chinese, Indonesian, Welsh, Galician, Japanese, Korean, Hebrew, and Bulgarian.
+
+## Building
+
+Requires the Pebble SDK (4.9+):
+
+```
+pebble build
+pebble install --emulator basalt
+```
 
 ## Issues
-You have found an issue? You can report it here: https://github.com/plarus/TimeStyleBBPebble/issues/new
 
-## Contributing
-Want to contribute to TimeStyle? Have a look at [the various feature requests that are still outstanding](https://github.com/freakified/TimeStylePebble/issues?q=is%3Aopen+is%3Aissue) -- just comment on one if you're interested in working on it!
+Report issues at: https://github.com/gravity-rose/TimeStyleBBNext/issues
 
-## Gallery
-<img src="pebble_basalt_ani.gif">  <img src="pebble_round_ani.gif">
+## License
+
+MIT License -- see [LICENSE](LICENSE).
+
+## Credits
+
+- Original TimeStyle by [freakified](https://github.com/freakified/TimeStylePebble)
+- TimeStyle BB fork by [plarus](https://github.com/plarus/TimeStyleBBPebble)
+- Open-Meteo weather integration ported from upstream freakified
+- Alt timezone fix by Flynn Duniho

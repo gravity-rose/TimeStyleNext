@@ -2,21 +2,31 @@
 #include "weather.h"
 #include "settings.h"
 #include "messaging.h"
+#include "appointment.h"
 
 static MessageProcessedCallback message_processed_callback;
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  bool weatherDataUpdated = false;
+
   // does this message contain current weather conditions?
   Tuple *weatherTemp_tuple = dict_find(iterator, MESSAGE_KEY_WeatherTemperature);
   Tuple *weatherConditions_tuple = dict_find(iterator, MESSAGE_KEY_WeatherCondition);
+  Tuple *weatherUVIndex_tuple = dict_find(iterator, MESSAGE_KEY_WeatherUVIndex);
 
-  if(weatherTemp_tuple != NULL && weatherConditions_tuple != NULL) {
-    // now set the weather conditions properly
+  if(weatherTemp_tuple != NULL) {
     Weather_weatherInfo.currentTemp = (int)weatherTemp_tuple->value->int32;
+    weatherDataUpdated = true;
+  }
 
+  if(weatherConditions_tuple != NULL) {
     Weather_setCurrentCondition(weatherConditions_tuple->value->int32);
+    weatherDataUpdated = true;
+  }
 
-    Weather_saveData();
+  if(weatherUVIndex_tuple != NULL) {
+    Weather_weatherInfo.currentUVIndex = (int)weatherUVIndex_tuple->value->int32;
+    weatherDataUpdated = true;
   }
 
   // does this message contain weather forecast information?
@@ -24,14 +34,32 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *weatherForecastHigh_tuple = dict_find(iterator, MESSAGE_KEY_WeatherForecastHighTemp);
   Tuple *weatherForecastLow_tuple = dict_find(iterator, MESSAGE_KEY_WeatherForecastLowTemp);
 
-  if(weatherForecastCondition_tuple != NULL && weatherForecastHigh_tuple != NULL
-     && weatherForecastLow_tuple != NULL) {
+  if(weatherForecastHigh_tuple != NULL) {
+    Weather_weatherInfo.todaysHighTemp = (int)weatherForecastHigh_tuple->value->int32;
+    weatherDataUpdated = true;
+  }
 
-    Weather_weatherForecast.highTemp = (int)weatherForecastHigh_tuple->value->int32;
-    Weather_weatherForecast.lowTemp = (int)weatherForecastLow_tuple->value->int32;
+  if(weatherForecastLow_tuple != NULL) {
+    Weather_weatherInfo.todaysLowTemp = (int)weatherForecastLow_tuple->value->int32;
+    weatherDataUpdated = true;
+  }
+
+  if(weatherForecastCondition_tuple != NULL) {
     Weather_setForecastCondition(weatherForecastCondition_tuple->value->int32);
+    weatherDataUpdated = true;
+  }
 
+  if(weatherDataUpdated) {
     Weather_saveData();
+  }
+
+  // does this message contain appointment data?
+  Tuple *apptTitle_tuple = dict_find(iterator, MESSAGE_KEY_ApptTitle);
+  Tuple *apptTime_tuple = dict_find(iterator, MESSAGE_KEY_ApptTime);
+
+  if(apptTitle_tuple != NULL && apptTime_tuple != NULL) {
+    Appointment_setData(apptTitle_tuple->value->cstring, apptTime_tuple->value->cstring);
+    Appointment_saveData();
   }
 
   // does this message contain new config information?
@@ -46,7 +74,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *leadingZero_tuple = dict_find(iterator, MESSAGE_KEY_SettingShowLeadingZero);
   Tuple *centerTime_tuple = dict_find(iterator, MESSAGE_KEY_SettingCenterTime);
   Tuple *batteryPct_tuple = dict_find(iterator, MESSAGE_KEY_SettingShowBatteryPct);
-  Tuple *disableWeather_tuple = dict_find(iterator, MESSAGE_KEY_SettingDisableWeather);
   Tuple *clockFont_tuple = dict_find(iterator, MESSAGE_KEY_SettingClockFontId);
   Tuple *hourlyVibe_tuple = dict_find(iterator, MESSAGE_KEY_SettingHourlyVibe);
   Tuple *useLargeFonts_tuple = dict_find(iterator, MESSAGE_KEY_SettingUseLargeFonts);
@@ -67,110 +94,111 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
   Tuple *activateDisconnectIcon_tuple = dict_find(iterator, MESSAGE_KEY_SettingDisconnectIcon);
 
+  Tuple *showNextAppt_tuple = dict_find(iterator, MESSAGE_KEY_SettingShowNextAppt);
 
   if(timeColor_tuple != NULL) {
-    globalSettings.timeColor = GColorFromHEX(timeColor_tuple->value->int32);
+    settings.timeColor = GColorFromHEX(timeColor_tuple->value->int32);
   }
 
   if(bgColor_tuple != NULL) {
-    globalSettings.timeBgColor = GColorFromHEX(bgColor_tuple->value->int32);
+    settings.timeBgColor = GColorFromHEX(bgColor_tuple->value->int32);
   }
 
   if(sidebarColor_tuple != NULL) {
-    globalSettings.sidebarColor = GColorFromHEX(sidebarColor_tuple->value->int32);
+    settings.sidebarColor = GColorFromHEX(sidebarColor_tuple->value->int32);
   }
 
   if(sidebarTextColor_tuple != NULL) {
     // text can only be black or white, so we'll enforce that here
-    globalSettings.sidebarTextColor = GColorFromHEX(sidebarTextColor_tuple->value->int32);
+    settings.sidebarTextColor = GColorFromHEX(sidebarTextColor_tuple->value->int32);
   }
 
   if(sidebarPos_tuple != NULL) {
-    globalSettings.sidebarLocation = (BarLocationType)sidebarPos_tuple->value->int8;
+    settings.sidebarLocation = (BarLocationType)sidebarPos_tuple->value->int8;
   }
 
   if(useMetric_tuple != NULL) {
-    globalSettings.useMetric = (bool)useMetric_tuple->value->int8;
+    settings.useMetric = (bool)useMetric_tuple->value->int8;
   }
 
   if(btVibe_tuple != NULL) {
-    globalSettings.btVibe = (bool)btVibe_tuple->value->int8;
+    settings.btVibe = (bool)btVibe_tuple->value->int8;
   }
 
   if(leadingZero_tuple != NULL) {
-    globalSettings.showLeadingZero = (bool)leadingZero_tuple->value->int8;
+    settings.showLeadingZero = (bool)leadingZero_tuple->value->int8;
   }
 
   if(centerTime_tuple != NULL) {
-    globalSettings.centerTime = (bool)centerTime_tuple->value->int8;
+    settings.centerTime = (bool)centerTime_tuple->value->int8;
   }
 
   if(batteryPct_tuple != NULL) {
-    globalSettings.showBatteryPct = (bool)batteryPct_tuple->value->int8;
+    settings.showBatteryPct = (bool)batteryPct_tuple->value->int8;
   }
 
   if(autobattery_tuple != NULL) {
-    globalSettings.disableAutobattery = (bool)autobattery_tuple->value->int8;
-  }
-
-  if(disableWeather_tuple != NULL) {
-    globalSettings.disableWeather = (bool)disableWeather_tuple->value->int8;
+    settings.disableAutobattery = (bool)autobattery_tuple->value->int8;
   }
 
   if(clockFont_tuple != NULL) {
-    globalSettings.clockFontId = clockFont_tuple->value->int8;
+    settings.clockFontId = clockFont_tuple->value->int8;
   }
 
   if(useLargeFonts_tuple != NULL) {
-    globalSettings.useLargeFonts = (bool)useLargeFonts_tuple->value->int8;
+    settings.useLargeFonts = (bool)useLargeFonts_tuple->value->int8;
   }
 
   if(hourlyVibe_tuple != NULL) {
-    globalSettings.hourlyVibe = hourlyVibe_tuple->value->int8;
+    settings.hourlyVibe = hourlyVibe_tuple->value->int8;
   }
 
   if(language_tuple != NULL) {
-    globalSettings.languageId = language_tuple->value->int8;
+    settings.languageId = language_tuple->value->int8;
   }
 
   if(widget0Id_tuple != NULL) {
-    globalSettings.widgets[0] = widget0Id_tuple->value->int8;
+    settings.widgets[0] = widget0Id_tuple->value->int8;
   }
 
   if(widget1Id_tuple != NULL) {
-    globalSettings.widgets[1] = widget1Id_tuple->value->int8;
+    settings.widgets[1] = widget1Id_tuple->value->int8;
   }
 
   if(widget2Id_tuple != NULL) {
-    globalSettings.widgets[2] = widget2Id_tuple->value->int8;
+    settings.widgets[2] = widget2Id_tuple->value->int8;
   }
 
   if(widget3Id_tuple != NULL) {
-    globalSettings.widgets[3] = widget3Id_tuple->value->int8;
+    settings.widgets[3] = widget3Id_tuple->value->int8;
   }
 
   if(altclockName_tuple != NULL) {
-    strncpy(globalSettings.altclockName, altclockName_tuple->value->cstring, sizeof(globalSettings.altclockName));
+    strncpy(settings.altclockName, altclockName_tuple->value->cstring, sizeof(settings.altclockName));
   }
 
   if(altclockOffset_tuple != NULL) {
-    globalSettings.altclockOffset = altclockOffset_tuple->value->int8;
+    settings.altclockOffset = altclockOffset_tuple->value->int8;
   }
 
   if(decimalSeparator_tuple != NULL) {
-    globalSettings.decimalSeparator = (char)decimalSeparator_tuple->value->int8;
+    settings.decimalSeparator = (char)decimalSeparator_tuple->value->int8;
   }
 
   if(healthActivityDisplay_tuple != NULL) {
-    globalSettings.healthActivityDisplay = (ActivityDisplayType)healthActivityDisplay_tuple->value->int8;
+    settings.healthActivityDisplay = (ActivityDisplayType)healthActivityDisplay_tuple->value->int8;
   }
 
   if(healthUseRestfulSleep_tuple != NULL) {
-    globalSettings.healthUseRestfulSleep = (bool)healthUseRestfulSleep_tuple->value->int8;
+    settings.healthUseRestfulSleep = (bool)healthUseRestfulSleep_tuple->value->int8;
   }
 
   if(activateDisconnectIcon_tuple != NULL) {
-    globalSettings.activateDisconnectIcon = (bool)activateDisconnectIcon_tuple->value->int8;
+    settings.activateDisconnectIcon = (bool)activateDisconnectIcon_tuple->value->int8;
+  }
+
+  if(showNextAppt_tuple != NULL) {
+    settings.showNextAppt = (bool)showNextAppt_tuple->value->int8;
   }
 
   // does this message contain new language information?
@@ -180,20 +208,20 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
   if(languageDayNames_tuple != NULL) {
     for(int i = 0;i<7;i++){
-      strncpy(globalSettings.languageDayNames[i], languageDayNames_tuple->value->cstring, sizeof(globalSettings.languageDayNames[i]));
+      strncpy(settings.languageDayNames[i], languageDayNames_tuple->value->cstring, sizeof(settings.languageDayNames[i]));
       languageDayNames_tuple = dict_find(iterator, MESSAGE_KEY_SettingLanguageDayNames + i + 1);
     }
   }
 
   if(languageMonthNames_tuple != NULL) {
     for(int i = 0;i<12;i++){
-      strncpy(globalSettings.languageMonthNames[i], languageMonthNames_tuple->value->cstring, sizeof(globalSettings.languageMonthNames[i]));
+      strncpy(settings.languageMonthNames[i], languageMonthNames_tuple->value->cstring, sizeof(settings.languageMonthNames[i]));
       languageMonthNames_tuple = dict_find(iterator, MESSAGE_KEY_SettingLanguageMonthNames + i + 1);
     }
   }
 
   if(languageWordForWeek_tuple != NULL) {
-    strncpy(globalSettings.languageWordForWeek, languageWordForWeek_tuple->value->cstring, sizeof(globalSettings.languageWordForWeek));
+    strncpy(settings.languageWordForWeek, languageWordForWeek_tuple->value->cstring, sizeof(settings.languageWordForWeek));
   }
 
   Settings_updateDynamicSettings();
@@ -221,7 +249,7 @@ void messaging_init(MessageProcessedCallback processed_callback) {
   app_message_register_inbox_received(inbox_received_callback);
 
   // Open AppMessage
-  app_message_open(305, 8);
+  app_message_open(512, 8);
 
   // APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch messaging is started!");
 }

@@ -9,6 +9,7 @@
 #include "health.h"
 #endif
 #include "time_date.h"
+#include "appointment.h"
 
 // windows and layers
 static Window* mainWindow;
@@ -31,10 +32,11 @@ static void update_screen(void) {
 #endif
 
   // update the sidebar
-  if(globalSettings.sidebarLocation != NONE) {
+  if(settings.sidebarLocation != NONE) {
     Sidebar_redraw();
   }
 
+  ApptBar_redraw();
   ClockArea_redraw();
 
   //APP_LOG(APP_LOG_LEVEL_DEBUG,"Avail RAM: %d", heap_bytes_free());
@@ -42,7 +44,7 @@ static void update_screen(void) {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // every 30 minutes, request new weather data
-  if(!globalSettings.disableWeather) {
+  if(!dynamicSettings.disableWeather) {
     if(tick_time->tm_min == weatherRefreshMinute && tick_time->tm_sec == 0) {
       messaging_requestNewWeatherData();
     }
@@ -50,11 +52,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   // every hour, if requested, vibrate
   if(!quiet_time_is_active() && tick_time->tm_sec == 0) {
-    if(globalSettings.hourlyVibe == VIBE_EVERY_HOUR) { // hourly vibes only
+    if(settings.hourlyVibe == VIBE_EVERY_HOUR) { // hourly vibes only
       if(tick_time->tm_min == 0) {
         vibes_double_pulse();
       }
-    } else if(globalSettings.hourlyVibe == VIBE_EVERY_HALF_HOUR) {  // hourly and half-hourly
+    } else if(settings.hourlyVibe == VIBE_EVERY_HALF_HOUR) {  // hourly and half-hourly
       if(tick_time->tm_min == 0) {
         vibes_double_pulse();
       } else if(tick_time->tm_min == 30) {
@@ -70,7 +72,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void unobstructed_area_will_change_handler(GRect final_unobstructed_screen_area, void *context) {
   // Get the full size of the screen
   GRect full_bounds = layer_get_bounds(windowLayer);
-  if (!grect_equal(&full_bounds, &final_unobstructed_screen_area) && globalSettings.sidebarLocation == TOP) {
+  if (!grect_equal(&full_bounds, &final_unobstructed_screen_area) && settings.sidebarLocation == TOP) {
     // Screen is about to become obstructed, hide the bottom/top bar
     Sidebar_set_hidden(true);
   }
@@ -79,7 +81,7 @@ static void unobstructed_area_will_change_handler(GRect final_unobstructed_scree
 static void unobstructed_area_did_change_handler(void *context) {
   int obstruction_height = get_obstruction_height(windowLayer);
 
-  if (obstruction_height == 0 && globalSettings.sidebarLocation == TOP) {
+  if (obstruction_height == 0 && settings.sidebarLocation == TOP) {
     Sidebar_set_hidden(false);
   }
 }
@@ -89,10 +91,10 @@ static void unobstructed_area_did_change_handler(void *context) {
 static void redrawScreen() {
 
   // check if the tick handler frequency should be changed
-  if(globalSettings.updateScreenEverySecond != updatingEverySecond) {
+  if(dynamicSettings.updateScreenEverySecond != updatingEverySecond) {
     tick_timer_service_unsubscribe();
 
-    if(globalSettings.updateScreenEverySecond) {
+    if(dynamicSettings.updateScreenEverySecond) {
       tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
       updatingEverySecond = true;
     } else {
@@ -104,7 +106,7 @@ static void redrawScreen() {
 #ifndef PBL_ROUND
   unobstructed_area_service_unsubscribe();
 
-  if(globalSettings.sidebarLocation == TOP) {
+  if(settings.sidebarLocation == TOP) {
     UnobstructedAreaHandlers unobstructed_area_handlers = {
       .will_change = unobstructed_area_will_change_handler,
       .did_change = unobstructed_area_did_change_handler
@@ -114,10 +116,11 @@ static void redrawScreen() {
   }
 #endif
 
-  window_set_background_color(mainWindow, globalSettings.timeBgColor);
+  window_set_background_color(mainWindow, settings.timeBgColor);
 
   // maybe sidebar changed!
   Sidebar_set_layer();
+  ApptBar_set_layer();
 
   // check if the fonts need to be switched
   ClockArea_update_fonts();
@@ -129,6 +132,7 @@ static void redrawScreen() {
 static void main_window_load(Window *window) {
   // create the sidebar
   Sidebar_init(window);
+  ApptBar_init(window);
 
   ClockArea_init(window);
 
@@ -138,13 +142,14 @@ static void main_window_load(Window *window) {
 
 static void main_window_unload(Window *window) {
   ClockArea_deinit();
+  ApptBar_deinit();
   Sidebar_deinit();
 }
 
 static void bluetoothStateChanged(bool newConnectionState) {
   // if the phone was connected but isn't anymore and the user has opted in,
   // trigger a vibration
-  if(!quiet_time_is_active() && isPhoneConnected && !newConnectionState && globalSettings.btVibe) {
+  if(!quiet_time_is_active() && isPhoneConnected && !newConnectionState && settings.btVibe) {
     static uint32_t const segments[] = { 200, 100, 100, 100, 500 };
     VibePattern pat = {
       .durations = segments,
@@ -154,13 +159,13 @@ static void bluetoothStateChanged(bool newConnectionState) {
   }
 
   // if the phone was disconnected and isn't anymore, update the data
-  if(!globalSettings.disableWeather && !isPhoneConnected && newConnectionState) {
+  if(!dynamicSettings.disableWeather && !isPhoneConnected && newConnectionState) {
     messaging_requestNewWeatherData();
   }
 
   isPhoneConnected = newConnectionState;
 
-  if(globalSettings.sidebarLocation != NONE) {
+  if(settings.sidebarLocation != NONE) {
     Sidebar_redraw();
   }
 }
@@ -193,6 +198,9 @@ static void init(void) {
   // init weather system
   Weather_init();
 
+  // init appointment data
+  Appointment_init();
+
   // init the messaging thing
   messaging_init(redrawScreen);
 
@@ -211,7 +219,7 @@ static void init(void) {
   windowLayer = window_get_root_layer(mainWindow);
 
   // Register with TickTimerService
-  if(globalSettings.updateScreenEverySecond) {
+  if(dynamicSettings.updateScreenEverySecond) {
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
     updatingEverySecond = true;
   } else {
@@ -236,6 +244,7 @@ static void deinit(void) {
 
   // unload weather stuff
   Weather_deinit();
+  Appointment_deinit();
   Settings_deinit();
 
   tick_timer_service_unsubscribe();

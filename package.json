@@ -1,16 +1,17 @@
 {
-  "name": "timestyle-bb-pebble",
-  "author": "Peyot",
-  "version": "1.1.0",
+  "name": "timestyle-next",
+  "author": "gravity-rose",
+  "version": "2.0.0",
   "keywords": [
     "pebble-watchface"
   ],
   "private": true,
   "dependencies": {
-    "pebble-fctx": "^1.6.2"
+    "pebble-fctx": "^1.6.2",
+    "pebble-clay": "^1.0.0"
   },
   "pebble": {
-    "displayName": "TimeStyle BB",
+    "displayName": "TimeStyle Next",
     "uuid": "bc612aa2-61f0-4abf-ad2d-0846efc4afa3",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -18,7 +19,9 @@
       "basalt",
       "chalk",
       "diorite",
-      "emery"
+      "emery",
+      "flint",
+      "gabbro"
     ],
     "capabilities": [
       "location",
@@ -36,6 +39,7 @@
       "WeatherForecastCondition",
       "WeatherForecastHighTemp",
       "WeatherForecastLowTemp",
+      "WeatherUVIndex",
       "SettingAltClockName",
       "SettingAltClockOffset",
       "SettingDisableAutobattery",
@@ -64,7 +68,10 @@
       "SettingWidget0ID",
       "SettingWidget1ID",
       "SettingWidget2ID",
-      "SettingWidget3ID"
+      "SettingWidget3ID",
+      "SettingShowNextAppt",
+      "ApptTitle",
+      "ApptTime"
     ],
 
     "resources": {

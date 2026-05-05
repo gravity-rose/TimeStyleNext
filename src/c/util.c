@@ -26,12 +26,12 @@ void image_recolor(GDrawCommandImage *img, GColor fill_color, GColor stroke_colo
 }
 
 void util_image_draw(GContext* ctx, GDrawCommandImage *img, int xPosition, int yPosition) {
-  image_recolor(img, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
+  image_recolor(img, dynamicSettings.iconFillColor, dynamicSettings.iconStrokeColor);
   gdraw_command_image_draw(ctx, img, GPoint(xPosition, yPosition));
 }
 
 void util_image_draw_inverted_color(GContext* ctx, GDrawCommandImage *img, int xPosition, int yPosition) {
-  image_recolor(img, globalSettings.iconStrokeColor, globalSettings.iconFillColor);
+  image_recolor(img, dynamicSettings.iconStrokeColor, dynamicSettings.iconFillColor);
   gdraw_command_image_draw(ctx, img, GPoint(xPosition, yPosition));
 }
 
@@ -51,8 +51,8 @@ void seconds_to_minutes_hours_text(HealthValue seconds, char * hours_text, char 
     // find minutes remainder
     minutes %= 60;
 
-    snprintf(hours_text, sizeof(hours_text), "%ih", hours);
-    snprintf(minutes_text, sizeof(minutes_text), "%im", minutes);
+    snprintf(hours_text, 4, "%ih", hours);
+    snprintf(minutes_text, 4, "%im", minutes);
 }
 
 void seconds_to_text(HealthValue seconds, char * hours_minutes_text) {
@@ -64,18 +64,18 @@ void seconds_to_text(HealthValue seconds, char * hours_minutes_text) {
     // find minutes remainder
     minutes %= 60;
 
-    snprintf(hours_minutes_text, sizeof(hours_minutes_text), "%ih%i", hours, minutes);
+    snprintf(hours_minutes_text, 8, "%ih%i", hours, minutes);
 }
 
 void distance_to_metric_text(HealthValue distance, char * metric_text) {
     if(distance < 100) {
-      snprintf(metric_text, sizeof(metric_text), "%lim", distance);
+      snprintf(metric_text, 8, "%lim", distance);
     } else if(distance < 1000) {
-      distance /= 100; // convert to tenths of km
-      snprintf(metric_text, sizeof(metric_text), "%c%likm", globalSettings.decimalSeparator, distance);
+      distance /= 100;
+      snprintf(metric_text, 8, "%c%likm", settings.decimalSeparator, distance);
     } else {
-      distance /= 1000; // convert to km
-      snprintf(metric_text, sizeof(metric_text), "%likm", distance);
+      distance /= 1000;
+      snprintf(metric_text, 8, "%likm", distance);
     }
 }
 
@@ -84,24 +84,24 @@ void distance_to_imperial_text(HealthValue distance, char * imperial_text) {
     int miles_whole  = (int)roundf(distance / 1609.0f);
 
     if(miles_whole > 0) {
-      snprintf(imperial_text, sizeof(imperial_text), "%imi", miles_whole);
+      snprintf(imperial_text, 8, "%imi", miles_whole);
     } else {
-      snprintf(imperial_text, sizeof(imperial_text), "%c%imi", globalSettings.decimalSeparator, miles_tenths);
+      snprintf(imperial_text, 8, "%c%imi", settings.decimalSeparator, miles_tenths);
     }
 }
 
 void steps_to_text(HealthValue steps, char * steps_text) {
     // format step string
     if(steps < 1000) {
-      snprintf(steps_text, sizeof(steps_text), "%li", steps);
+      snprintf(steps_text, 8, "%li", steps);
     } else {
       int steps_thousands = steps / 1000;
       int steps_hundreds  = steps / 100 % 10;
 
       if (steps < 10000) {
-        snprintf(steps_text, sizeof(steps_text), "%i%c%ik", steps_thousands, globalSettings.decimalSeparator, steps_hundreds);
+        snprintf(steps_text, 8, "%i%c%ik", steps_thousands, settings.decimalSeparator, steps_hundreds);
       } else {
-        snprintf(steps_text, sizeof(steps_text), "%ik", steps_thousands);
+        snprintf(steps_text, 8, "%ik", steps_thousands);
       }
     }
 }
@@ -109,15 +109,15 @@ void steps_to_text(HealthValue steps, char * steps_text) {
 void kCalories_to_text(HealthValue kcalories, char * kcalories_text) {
     // format kcalories string
     if(kcalories < 1000) {
-      snprintf(kcalories_text, sizeof(kcalories_text), "%likc", kcalories);
+      snprintf(kcalories_text, 8, "%likc", kcalories);
     } else {
       int kcalories_thousands = kcalories / 1000;
       int kcalories_hundreds  = kcalories / 100 % 10;
 
       if (kcalories < 10000) {
-        snprintf(kcalories_text, sizeof(kcalories_text), "%i%c%iMc", kcalories_thousands, globalSettings.decimalSeparator, kcalories_hundreds);
+        snprintf(kcalories_text, 8, "%i%c%iMc", kcalories_thousands, settings.decimalSeparator, kcalories_hundreds);
       } else {
-        snprintf(kcalories_text, sizeof(kcalories_text), "%iMc", kcalories_thousands);
+        snprintf(kcalories_text, 8, "%iMc", kcalories_thousands);
       }
     }
 }

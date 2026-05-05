@@ -20,10 +20,28 @@ def configure(ctx):
     change after calling ctx.load('pebble_sdk') and make sure to set the correct environment first.
     Universal configuration: add your change prior to calling ctx.load('pebble_sdk').
     """
+    _patch_clay_for_new_platforms()
     ctx.load('pebble_sdk')
 
 
+def _patch_clay_for_new_platforms():
+    """Patch pebble-clay to support flint and gabbro platforms."""
+    import shutil
+    clay_base = os.path.join('node_modules', 'pebble-clay', 'dist')
+    for subdir in ['include/pebble-clay', 'binaries']:
+        # flint uses diorite's clay files
+        src = os.path.join(clay_base, subdir, 'diorite')
+        dst = os.path.join(clay_base, subdir, 'flint')
+        if os.path.isdir(src) and not os.path.isdir(dst):
+            shutil.copytree(src, dst)
+        # gabbro uses chalk's clay files (round)
+        src = os.path.join(clay_base, subdir, 'chalk')
+        dst = os.path.join(clay_base, subdir, 'gabbro')
+        if os.path.isdir(src) and not os.path.isdir(dst):
+            shutil.copytree(src, dst)
+
 def build(ctx):
+    _patch_clay_for_new_platforms()
     ctx.load('pebble_sdk')
 
     build_worker = os.path.exists('worker_src')

@@ -3,7 +3,6 @@
 #include "settings.h"
 
 WeatherInfo Weather_weatherInfo;
-WeatherForecastInfo Weather_weatherForecast;
 
 GDrawCommandImage* Weather_currentWeatherIcon;
 GDrawCommandImage* Weather_forecastWeatherIcon;
@@ -70,54 +69,42 @@ void Weather_setForecastCondition(int conditionCode) {
   gdraw_command_image_destroy(Weather_forecastWeatherIcon);
   Weather_forecastWeatherIcon = gdraw_command_image_create_with_resource(forecastWeatherIcon);
 
-  Weather_weatherForecast.forecastIconResourceID = forecastWeatherIcon;
+  Weather_weatherInfo.forecastIconResourceID = forecastWeatherIcon;
 }
 
 void Weather_init(void) {
-  // if possible, load weather data from persistent storage
-  if (persist_exists(WEATHERINFO_PERSIST_KEY) && !globalSettings.disableWeather) {
-    // printf("current key exists!");
+  // initialize to null/invalid
+  Weather_weatherInfo.currentTemp = INT32_MIN;
+  Weather_weatherInfo.currentIconResourceID = 0;
+  Weather_weatherInfo.currentUVIndex = INT32_MIN;
+  Weather_weatherInfo.todaysHighTemp = INT32_MIN;
+  Weather_weatherInfo.todaysLowTemp = INT32_MIN;
+  Weather_weatherInfo.forecastIconResourceID = 0;
+
+  Weather_currentWeatherIcon = NULL;
+  Weather_forecastWeatherIcon = NULL;
+
+  if (persist_exists(WEATHER_PERSIST_KEY) && !dynamicSettings.disableWeather) {
     WeatherInfo w;
-    persist_read_data(WEATHERINFO_PERSIST_KEY, &w, sizeof(WeatherInfo));
+    persist_read_data(WEATHER_PERSIST_KEY, &w, sizeof(WeatherInfo));
+    memcpy(&Weather_weatherInfo, &w, sizeof(WeatherInfo));
 
-    Weather_weatherInfo = w;
+    if(w.currentIconResourceID > 0) {
+      Weather_currentWeatherIcon = gdraw_command_image_create_with_resource(w.currentIconResourceID);
+    }
 
-    Weather_currentWeatherIcon = gdraw_command_image_create_with_resource(w.currentIconResourceID);
-
-  } else {
-
-    // printf("current key does not exist!");
-    // otherwise, use null data
-    Weather_currentWeatherIcon = NULL;
-    Weather_weatherInfo.currentTemp = INT32_MIN;
-  }
-
-  if (persist_exists(WEATHERFORECAST_PERSIST_KEY) && !globalSettings.disableWeather) {
-    // printf("forecast key exists!");
-    WeatherForecastInfo w;
-    persist_read_data(WEATHERFORECAST_PERSIST_KEY, &w, sizeof(WeatherForecastInfo));
-
-    Weather_weatherForecast = w;
-
-    Weather_forecastWeatherIcon = gdraw_command_image_create_with_resource(w.forecastIconResourceID);
-
-  } else {
-    // printf("forecast key does not exist!");
-
-    Weather_forecastWeatherIcon = NULL;
-    Weather_weatherForecast.highTemp = INT32_MIN;
-    Weather_weatherForecast.lowTemp = INT32_MIN;
+    if(w.forecastIconResourceID > 0) {
+      Weather_forecastWeatherIcon = gdraw_command_image_create_with_resource(w.forecastIconResourceID);
+    }
   }
 }
 
 void Weather_saveData(void) {
-  // printf("saving data!");
-  persist_write_data(WEATHERINFO_PERSIST_KEY, &Weather_weatherInfo, sizeof(WeatherInfo));
-  persist_write_data(WEATHERFORECAST_PERSIST_KEY, &Weather_weatherForecast, sizeof(WeatherForecastInfo));
+  persist_write_data(WEATHER_PERSIST_KEY, &Weather_weatherInfo, sizeof(WeatherInfo));
 }
 
 void Weather_deinit(void) {
-  if (!globalSettings.disableWeather) {
+  if (!dynamicSettings.disableWeather) {
     // save weather data to persistent storage
     Weather_saveData();
   }

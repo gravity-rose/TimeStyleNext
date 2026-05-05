@@ -2,12 +2,16 @@
 #include <pebble.h>
 #include "sidebar_widgets.h"
 
-#define SETTINGS_VERSION_KEY 4
+#define SETTINGS_PERSIST_KEY 100
+#define SETTINGS_VERSION_PERSIST_KEY 4
 
 // settings "version" for app version 4.0
-#define CURRENT_SETTINGS_VERSION 8
+#define CURRENT_SETTINGS_VERSION 10
 
-#define FIXED_WIDGET_HEIGHT 51
+#define FIXED_WIDGET_HEIGHT_BASE 51
+#define FIXED_WIDGET_HEIGHT_EMERY 55
+#define APPT_BAR_HEIGHT_BASE 22
+#define APPT_BAR_HEIGHT_EMERY 24
 
 #define LANGUAGE_EN 0
 #define LANGUAGE_FR 1
@@ -112,73 +116,22 @@ typedef struct {
   bool healthUseRestfulSleep;
   char decimalSeparator;
 
-  // dynamic settings (calculated based the currently-selected widgets)
+  // appointment bar settings
+  bool showNextAppt;
+} Settings;
+
+typedef struct {
   bool disableWeather;
   bool updateScreenEverySecond;
   bool enableAutoBatteryWidget;
   bool enableBeats;
   bool enableAltTimeZone;
-
-  // TODO: these shouldn't be dynamic
   GColor iconFillColor;
   GColor iconStrokeColor;
-} Settings;
+} DynamicSettings;
 
-
-// !! all future settings should be added to the bottom of this structure
-// !! do not remove fields from this structure, it will lead to unexpected behaviour
-typedef struct {
-  GColor timeColor;
-  GColor timeBgColor;
-  GColor sidebarColor;
-  GColor sidebarTextColor;
-
-  // general settings
-  uint8_t languageId;
-  uint8_t showLeadingZero:1;
-  uint8_t clockFontId:7;
-
-  // vibration settings
-  uint8_t btVibe:1;
-  int8_t hourlyVibe:7;
-
-  // sidebar settings
-  uint8_t widgets[4];
-  uint8_t useLargeFonts:1;
-
-  // weather widget settings
-  uint8_t useMetric:1;
-
-  // battery meter widget settings
-  uint8_t showBatteryPct:1;
-  uint8_t disableAutobattery:1;
-
-  // health widget Settings
-  ActivityDisplayType healthActivityDisplay:2;
-  uint8_t healthUseRestfulSleep:1;
-  char decimalSeparator;
-
-  // alt tz widget settings
-  char altclockName[8];
-  int8_t altclockOffset;
-
-  // sidebar location settings
-  BarLocationType sidebarLocation:3;
-
-  // bluetooth disconnection icon
-  int8_t activateDisconnectIcon:1;
-
-  int8_t centerTime:1;
-
-  char languageDayNames[7][8];
-  char languageMonthNames[12][8];
-  char languageWordForWeek[12];
-} StoredSettings;
-
-extern Settings globalSettings;
-
-// key for all the settings for versions 6 and higher
-#define SETTING_VERSION6_AND_HIGHER       100
+extern Settings settings;
+extern DynamicSettings dynamicSettings;
 
 void Settings_init(void);
 void Settings_deinit(void);

@@ -21,6 +21,11 @@ extern bool SidebarWidgets_fixedHeight;
 extern int SidebarWidgets_xOffset;
 
 /*
+ * Runtime-computed widget height, scaled for display size (Emery vs others)
+ */
+extern int SidebarWidgets_fixedWidgetHeight;
+
+/*
  * The different types of sidebar widgets:
  * we'll give them numbers so that we can index them in settings
  */
@@ -39,7 +44,8 @@ typedef enum {
   BEATS                     = 11,
   HEARTRATE                 = 12,
   SLEEP                     = 13,
-  STEP                      = 14
+  STEP                      = 14,
+  WEATHER_UV_INDEX          = 15
 } SidebarWidgetType;
 
 typedef struct {

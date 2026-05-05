@@ -45,12 +45,12 @@ void time_date_update(void) {
   time_info = localtime(&rawTime);
 
   if (clock_is_24h_style()) {
-    strftime(time_date_hours, sizeof(time_date_hours), (globalSettings.showLeadingZero) ? "%H" : "%k", time_info);
+    strftime(time_date_hours, sizeof(time_date_hours), (settings.showLeadingZero) ? "%H" : "%k", time_info);
   } else {
-    strftime(time_date_hours, sizeof(time_date_hours), (globalSettings.showLeadingZero) ? "%I" : "%l", time_info);
+    strftime(time_date_hours, sizeof(time_date_hours), (settings.showLeadingZero) ? "%I" : "%l", time_info);
   }
 
-  if(time_date_hours[0] == ' ' && globalSettings.centerTime) {
+  if(time_date_hours[0] == ' ' && settings.centerTime) {
     time_date_hours[0] = time_date_hours[1];
     time_date_hours[1] = '\0';
   }
@@ -78,12 +78,12 @@ void time_date_update(void) {
   time_date_isAmHour = time_info->tm_hour < 12;
 #endif // PBL_ROUND
 
-  if(globalSettings.enableAltTimeZone) {
-    // set the alternate time zone string
-    int hour = time_info->tm_hour;
+  if(dynamicSettings.enableAltTimeZone) {
+    // set the alternate time zone string — normalize to UTC first
+    int hour = time_info->tm_hour - time_info->tm_gmtoff / 60 / 60 - time_info->tm_isdst;
 
     // apply the configured offset value
-    hour += globalSettings.altclockOffset;
+    hour += settings.altclockOffset;
 
     char am_pm;
 
@@ -99,14 +99,14 @@ void time_date_update(void) {
       am_pm = (mod(hour, 24) < 12) ? 'a' : 'p';
     }
 
-    if(globalSettings.showLeadingZero && hour < 10) {
+    if(settings.showLeadingZero && hour < 10) {
       snprintf(time_date_altClock, sizeof(time_date_altClock), "0%i%c", hour, am_pm);
     } else {
       snprintf(time_date_altClock, sizeof(time_date_altClock), "%i%c", hour, am_pm);
     }
   }
 
-  if(globalSettings.enableBeats) {
+  if(dynamicSettings.enableBeats) {
     // this must be last, because time_get_beats screws with the time structure
     int beats = 0;
 
