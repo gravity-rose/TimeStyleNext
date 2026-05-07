@@ -497,16 +497,27 @@ static void updateApptBar(Layer *l, GContext* ctx) {
   char timeBuf[10];
   Appointment_formatTime(event, timeBuf, sizeof(timeBuf));
 
-  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
-  int yOffset = (appt_bar_height - 14) / 2 - 2;
-  int timeWidth = 45;
+  GFont font;
+  int fontSize, timeWidth, textHeight;
+  if(appt_bar_height > APPT_BAR_HEIGHT_BASE) {
+    font = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+    fontSize = 24;
+    timeWidth = 75;
+    textHeight = 28;
+  } else {
+    font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+    fontSize = 14;
+    timeWidth = 45;
+    textHeight = 16;
+  }
+  int yOffset = (appt_bar_height - fontSize) / 2 - (appt_bar_height > APPT_BAR_HEIGHT_BASE ? 3 : 2);
 
   graphics_draw_text(ctx, timeBuf, font,
-                     GRect(3, yOffset, timeWidth, 16),
+                     GRect(3, yOffset, timeWidth, textHeight),
                      GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 
   graphics_draw_text(ctx, event->title, font,
-                     GRect(timeWidth + 3, yOffset, bounds.size.w - timeWidth - 6, 16),
+                     GRect(timeWidth + 3, yOffset, bounds.size.w - timeWidth - 6, textHeight),
                      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 #endif
