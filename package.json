@@ -12,7 +12,7 @@
   },
   "pebble": {
     "displayName": "TimeStyle Next",
-    "uuid": "bc612aa2-61f0-4abf-ad2d-0846efc4afa3",
+    "uuid": "c81c76b1-b007-49cf-8030-5f4030650b16",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
