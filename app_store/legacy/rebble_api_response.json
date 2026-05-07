@@ -1,0 +1,215 @@
+{
+    "data": [
+        {
+            "author": "plarus",
+            "capabilities": [
+                "health",
+                "location",
+                "configurable"
+            ],
+            "category": "Faces",
+            "category_color": "ffffff",
+            "category_id": "528d3ef2dc7b5f580700000a",
+            "changelog": [
+                {
+                    "published_date": "Tue, 02 Feb 2021 22:25:41 GMT",
+                    "release_notes": "Fix for weather forecast",
+                    "version": "1.2"
+                },
+                {
+                    "published_date": "Sat, 03 Mar 2018 19:16:34 GMT",
+                    "release_notes": "Enhancement\r\n * #4 Languages memory management optimisation\r\n * #5 Time display not colon centered\r\n * #8 Add Bulgarian language\r\n * Switch to pebble-fctx-lite\r\n * Various minor optimisations\r\n\r\nBug correction\r\n * #10 Bluetooth disconnection icon does not show on bottom sidebar\r\n * #11 Timeline \"Quick View\" oddity with Top Bar Position set\r\n * #12 Gray text display problem with Aplite/Diorite\r\n\r\nMore informations are available here: https://github.com/plarus/TimeStyleBBPebble",
+                    "version": "1.1"
+                },
+                {
+                    "published_date": "Sun, 31 Dec 2017 10:16:20 GMT",
+                    "release_notes": "* Aplite get same widget management than other Pebble\r\n* Code cleaning and optimization\r\n* GFont and FFont are loaded only when needed\r\n* Switch to pebble-fctx version 1.6.2",
+                    "version": "1.0"
+                }
+            ],
+            "companions": {
+                "android": null,
+                "ios": null
+            },
+            "compatibility": {
+                "android": {
+                    "supported": true
+                },
+                "aplite": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": true,
+                    "supported": true
+                },
+                "basalt": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": true,
+                    "supported": true
+                },
+                "chalk": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": true,
+                    "supported": true
+                },
+                "diorite": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": true,
+                    "supported": true
+                },
+                "emery": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": true,
+                    "supported": true
+                },
+                "flint": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": false,
+                    "supported": true
+                },
+                "gabbro": {
+                    "firmware": {
+                        "major": 3
+                    },
+                    "has_binary": false,
+                    "supported": true
+                },
+                "ios": {
+                    "min_js_version": 1,
+                    "supported": true
+                }
+            },
+            "created_at": "Sun, 31 Dec 2017 10:00:47 GMT",
+            "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: Up to 3 widgets with left/right bar, up to 4 widgets on top/bottom bar, hour and date dislayed with top/bottom bar.\r\n\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.\r\n\r\nColorful: includes over 20 preset color schemes, and also supports custom colors using any color the Pebble Time can display\u2014also supports saving, loading, and sharing custom presets!\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\n\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+            "developer_id": "57c31d1d5e3c3de160000338",
+            "discourse_url": null,
+            "hardware_platforms": [
+                {
+                    "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: Up to 3 widgets with left/right bar, up to 4 widgets on top/bottom bar, hour and date dislayed with top/bottom bar.\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.\r\n\r\nColorful: includes over 20 preset color schemes\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\n\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+                    "images": {
+                        "icon": "",
+                        "list": "https://assets2.rebble.io/exact/144x168/0vyDtsBZROmBnAUYsLiV",
+                        "screenshot": "https://assets2.rebble.io/144x168/MDsGf2zhRImhqChociL6"
+                    },
+                    "name": "aplite",
+                    "pebble_process_info_flags": 73,
+                    "sdk_version": "5.78"
+                },
+                {
+                    "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: Up to 3 widgets with left/right bar, up to 4 widgets on top/bottom bar, hour and date dislayed with top/bottom bar.\r\n\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.\r\n\r\nColorful: includes over 20 preset color schemes, and also supports custom colors using any color the Pebble Time can display\u2014also supports saving, loading, and sharing custom presets!\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\n\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+                    "images": {
+                        "icon": "",
+                        "list": "https://assets2.rebble.io/exact/144x168/0vyDtsBZROmBnAUYsLiV",
+                        "screenshot": "https://assets2.rebble.io/144x168/0vyDtsBZROmBnAUYsLiV"
+                    },
+                    "name": "basalt",
+                    "pebble_process_info_flags": 137,
+                    "sdk_version": "5.86"
+                },
+                {
+                    "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: left/right or top/bottom bar.\r\n\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.\r\n\r\nColorful: includes over 20 preset color schemes, and also supports custom colors using any color the Pebble Time can display\u2014also supports saving, loading, and sharing custom presets!\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+                    "images": {
+                        "icon": "",
+                        "list": "https://assets2.rebble.io/exact/180x180/0vyDtsBZROmBnAUYsLiV",
+                        "screenshot": "https://assets2.rebble.io/180x180/GC4RRil1RhievMH9xiFF"
+                    },
+                    "name": "chalk",
+                    "pebble_process_info_flags": 201,
+                    "sdk_version": "5.86"
+                },
+                {
+                    "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: Up to 3 widgets with left/right bar, up to 4 widgets on top/bottom bar, hour and date dislayed with top/bottom bar.\r\n\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. \r\n\r\nColorful: includes over 20 preset color schemes\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+                    "images": {
+                        "icon": "",
+                        "list": "https://assets2.rebble.io/exact/144x168/0vyDtsBZROmBnAUYsLiV",
+                        "screenshot": "https://assets2.rebble.io/144x168/UvouLdWwQQq5e6fOYrns"
+                    },
+                    "name": "diorite",
+                    "pebble_process_info_flags": 265,
+                    "sdk_version": "5.86"
+                },
+                {
+                    "description": "Inspired by the visual language of the Timeline found on the Pebble Time, TimeStyle BB is designed as the \u201cpresent\u201d to complement the Timeline\u2019s \u201cpast\u201d and \u201cfuture\u201d.\r\n\r\nVarious display options: Up to 3 widgets with left/right bar, up to 4 widgets on top/bottom bar, hour and date dislayed with top/bottom bar.\r\n\r\nReadable: With more than 80% of the display area devoted to the time and 6 font options, TimeStyle is designed for readability in all conditions. Unlike most other Pebble faces, time text is displayed using antialiasing, achieved using palette swapping.\r\n\r\nColorful: includes over 20 preset color schemes, and also supports custom colors using any color the Pebble Time can display\u2014also supports saving, loading, and sharing custom presets!\r\n\r\nConfigurable: TimeStyle features a wide variety of different complications, including step counts, sleep times, weather forecasts, the week number, seconds, the time in another time zone, the battery level, and more.\r\n\r\nKeeps you informed: TimeStyle automatically displays notifications when the battery is low or when your phone disconnects.\r\n\r\nWorks in 30 different languages, more than any other Pebble face: English, French, German, Spanish, Italian, Dutch, Turkish, Czech, Slovak, Portuguese, Greek, Swedish, Polish, Romanian, Vietnamese, Catalan, Norwegian, Russian, Estonian, Basque, Finnish, Danish, Lithuanian, Slovenian, Hungarian, Croatian, Serbian, Irish, Latviann, and Ukrainian.",
+                    "images": {
+                        "icon": "",
+                        "list": "https://assets2.rebble.io/exact/200x228/0vyDtsBZROmBnAUYsLiV",
+                        "screenshot": "https://assets2.rebble.io/200x228/XJT6QZvrTbiJXiz5jkXn"
+                    },
+                    "name": "emery",
+                    "pebble_process_info_flags": 329,
+                    "sdk_version": "5.86"
+                }
+            ],
+            "header_images": "",
+            "hearts": 371,
+            "icon_image": {
+                "28x28": "",
+                "48x48": ""
+            },
+            "icon_resource_id": 1,
+            "id": "5a48b54f0dfc32823d0041d5",
+            "latest_release": {
+                "id": "6019d1651342ae012a0fbee1",
+                "js_md5": "702b4745169d2768214b02acb4f70521",
+                "js_version": -1,
+                "pbw_file": "https://storage.googleapis.com/rebble-pbws/pbw/6019d1651342ae012a0fbee1.pbw",
+                "published_date": "Tue, 02 Feb 2021 22:25:41 GMT",
+                "release_notes": "Fix for weather forecast",
+                "version": "1.2"
+            },
+            "links": {
+                "add": "https://a",
+                "add_flag": "https://appstore-api.rebble.io/api/v0/applications/5a48b54f0dfc32823d0041d5/add_flag",
+                "add_heart": "https://appstore-api.rebble.io/api/v0/applications/5a48b54f0dfc32823d0041d5/add_heart",
+                "remove": "https://b",
+                "remove_flag": "https://appstore-api.rebble.io/api/v0/applications/5a48b54f0dfc32823d0041d5/remove_flag",
+                "remove_heart": "https://appstore-api.rebble.io/api/v0/applications/5a48b54f0dfc32823d0041d5/remove_heart",
+                "share": "https://apps.rebble.io/application/5a48b54f0dfc32823d0041d5"
+            },
+            "list_image": {
+                "144x144": "https://assets2.rebble.io/exact/144x144/0vyDtsBZROmBnAUYsLiV",
+                "80x80": "https://assets2.rebble.io/exact/80x80/0vyDtsBZROmBnAUYsLiV"
+            },
+            "published_date": "Sun, 31 Dec 2017 10:30:50 GMT",
+            "screenshot_hardware": "basalt",
+            "screenshot_images": [
+                {
+                    "144x168": "https://assets2.rebble.io/exact/144x168/0vyDtsBZROmBnAUYsLiV"
+                },
+                {
+                    "144x168": "https://assets2.rebble.io/exact/144x168/KzJ4bLUUQ26RFStNG1tB"
+                },
+                {
+                    "144x168": "https://assets2.rebble.io/exact/144x168/Qgb3w26wSmVwOlFOGgFv"
+                },
+                {
+                    "144x168": "https://assets2.rebble.io/exact/144x168/7Ksc61qwQhG0oqz6DIqs"
+                },
+                {
+                    "144x168": "https://assets2.rebble.io/exact/144x168/2zXe9wgPT6yEkkBZy5Wc"
+                }
+            ],
+            "source": "https://github.com/plarus/TimeStyleBBPebble",
+            "title": "TimeStyle BB",
+            "type": "watchface",
+            "uuid": "bc612aa2-61f0-4abf-ad2d-0846efc4afa3",
+            "visible": true,
+            "website": "https://github.com/plarus/TimeStyleBBPebble/blob/master/README.md"
+        }
+    ],
+    "limit": 20,
+    "links": {
+        "nextPage": null
+    },
+    "offset": 0
+}
