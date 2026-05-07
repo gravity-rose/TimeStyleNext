@@ -2,50 +2,36 @@
 # Opens the Clay config page for the running emulator
 # Usage: ./open_config.sh [platform]
 PLATFORM=${1:-emery}
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Clean up old instances
-pkill -f "config_server.py" 2>/dev/null
-pkill -f "emu-app-config" 2>/dev/null
+ps aux | grep -E "config_server.py|emu-app-config" | grep -v grep | awk '{print $2}' | xargs -r kill 2>/dev/null
 sleep 1
 
-# Get the config URL from emu-app-config
-echo "Getting config page from emulator..."
-TMPFILE=$(mktemp)
-pebble emu-app-config --emulator "$PLATFORM" > "$TMPFILE" 2>&1 &
-EMU_PID=$!
+# Serve the config page over HTTP
+python3 "$SCRIPT_DIR/config_server.py" "$SCRIPT_DIR/config_page.html" "$PLATFORM" &
+SERVER_PID=$!
+sleep 2
 
-# Wait for URL
-for i in $(seq 1 15); do
-    grep -q "CONFIG URL" "$TMPFILE" 2>/dev/null && break
-    sleep 1
-done
+# Get the server URL
+PORT=$(ss -tlnp 2>/dev/null | grep "pid=$SERVER_PID" | grep -oP ':\K\d+' | head -1)
 
-if ! grep -q "CONFIG URL" "$TMPFILE" 2>/dev/null; then
-    echo "ERROR: Timed out. Is the emulator running with the app installed?"
-    kill $EMU_PID 2>/dev/null
-    rm -f "$TMPFILE"
+if [ -z "$PORT" ]; then
+    echo "ERROR: Config server failed to start."
     exit 1
 fi
 
-# Get the callback port that emu-app-config is listening on
-CBPORT=$(ss -tlnp 2>/dev/null | grep '"pebble"' | grep -oP ':\K\d+' | head -1)
-
-# Decode and serve the config page
-python3 "$(dirname "$0")/config_server.py" "$TMPFILE" "$CBPORT" &
-SERVER_PID=$!
-
-sleep 3
-PORT=$(ss -tlnp 2>/dev/null | grep "pid=$SERVER_PID" | grep -oP ':\K\d+' | head -1)
-
+URL="http://localhost:$PORT/"
 echo ""
-echo "  Config page: http://localhost:$PORT/"
-echo "  Callback port: $CBPORT (emu-app-config PID $EMU_PID)"
+echo "  Config page: $URL"
+echo "  Platform: $PLATFORM"
+echo "  Server PID: $SERVER_PID"
 echo ""
-echo "  Open the URL above, make changes, hit Save."
+echo "  Save applies settings and keeps the server running."
 echo "  Press Ctrl+C when done."
 echo ""
 
-# Wait for either process to exit
-wait $EMU_PID 2>/dev/null
-kill $SERVER_PID 2>/dev/null
-rm -f "$TMPFILE"
+# Open in browser
+wslview "$URL" 2>/dev/null || xdg-open "$URL" 2>/dev/null || echo "Open $URL in your browser."
+
+wait $SERVER_PID 2>/dev/null
