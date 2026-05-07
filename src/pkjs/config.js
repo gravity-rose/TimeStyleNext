@@ -255,7 +255,6 @@ module.exports = [
       },
       {
         "type": "input",
-        "messageKey": "",
         "defaultValue": "",
         "label": "Weather Location (blank = GPS)",
         "attributes": {
@@ -375,7 +374,6 @@ module.exports = [
       },
       {
         "type": "input",
-        "messageKey": "",
         "defaultValue": "",
         "label": "iCal URL",
         "attributes": {

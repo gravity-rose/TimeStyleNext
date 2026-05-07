@@ -67,6 +67,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     }
   }
 
+  Appointment_tick();
   update_screen();
 }
 

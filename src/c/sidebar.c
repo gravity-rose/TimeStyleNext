@@ -468,7 +468,7 @@ static Layer* apptBarLayer;
 
 static bool isApptBarActive(void) {
   return settings.showNextAppt
-      && Appointment_info.hasData
+      && Appointment_hasCurrentEvent()
       && (settings.sidebarLocation == TOP || settings.sidebarLocation == BOTTOM);
 }
 
@@ -491,15 +491,21 @@ static void updateApptBar(Layer *l, GContext* ctx) {
 
   graphics_context_set_text_color(ctx, settings.sidebarTextColor);
 
+  AppointmentEvent *event = Appointment_getCurrentEvent();
+  if(!event) return;
+
+  char timeBuf[10];
+  Appointment_formatTime(event, timeBuf, sizeof(timeBuf));
+
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   int yOffset = (appt_bar_height - 14) / 2 - 2;
-  int timeWidth = 40;
+  int timeWidth = 45;
 
-  graphics_draw_text(ctx, Appointment_info.time, font,
+  graphics_draw_text(ctx, timeBuf, font,
                      GRect(3, yOffset, timeWidth, 16),
                      GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 
-  graphics_draw_text(ctx, Appointment_info.title, font,
+  graphics_draw_text(ctx, event->title, font,
                      GRect(timeWidth + 3, yOffset, bounds.size.w - timeWidth - 6, 16),
                      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }

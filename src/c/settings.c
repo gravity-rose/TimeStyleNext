@@ -67,7 +67,7 @@ void Settings_loadDefaultsSettings(void) {
   settings.altclockOffset         = 0;
   settings.activateDisconnectIcon = true;
   settings.centerTime             = false;
-  settings.showNextAppt           = false;
+  settings.showNextAppt           = true;
 }
 
 /*

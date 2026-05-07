@@ -46,24 +46,21 @@ Pebble.addEventListener('webviewclosed', function(e) {
     return;
   }
 
-  var dict = clay.getResponsePayload(e.response);
+  var dict = clay.getSettings(e.response);
+
+  // Clay select components return strings from HTML; C reads value->int8,
+  // so numeric strings must become JS numbers (sent as INT32, not CSTRING)
+  Object.keys(dict).forEach(function(key) {
+    var v = dict[key];
+    if(typeof v === 'string' && /^-?\d+$/.test(v)) {
+      dict[key] = parseInt(v, 10);
+    }
+  });
+
   console.log('Config data received: ' + JSON.stringify(dict));
 
   // extract language ID for two-phase send
   var languageId = dict[keys.SettingLanguageID];
-
-  // handle localStorage-only settings from Clay response
-  var claySettings = JSON.parse(decodeURIComponent(e.response));
-  if(claySettings) {
-    // weather location fields
-    if(claySettings.weather_loc !== undefined) {
-      window.localStorage.setItem('weather_loc', claySettings.weather_loc);
-    }
-    // calendar iCal URL
-    if(claySettings.calendar_ical_url !== undefined) {
-      window.localStorage.setItem('calendar_ical_url', claySettings.calendar_ical_url);
-    }
-  }
 
   // determine weather enable/disable from widget selections
   var widgetIDs = [
@@ -74,8 +71,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   ];
 
   var disableWeather = 'yes';
-  if(widgetIDs.indexOf(7) != -1 || widgetIDs.indexOf(8) != -1 || widgetIDs.indexOf(15) != -1 ||
-     widgetIDs.indexOf('7') != -1 || widgetIDs.indexOf('8') != -1 || widgetIDs.indexOf('15') != -1) {
+  if(widgetIDs.indexOf(7) != -1 || widgetIDs.indexOf(8) != -1 || widgetIDs.indexOf(15) != -1) {
     disableWeather = 'no';
   }
   window.localStorage.setItem('disable_weather', disableWeather);

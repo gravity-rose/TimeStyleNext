@@ -27,9 +27,20 @@ def configure(ctx):
 
 
 def _patch_clay_for_new_platforms():
-    """Patch pebble-clay to support flint and gabbro platforms."""
+    """Patch pebble-clay to support flint/gabbro and fix dead S3 URL for emulator."""
     import shutil
     clay_base = os.path.join('node_modules', 'pebble-clay', 'dist')
+
+    # Fix Clay's dead S3 URL so config works in the pypkjs emulator
+    clay_js = os.path.join(clay_base, 'js', 'index.js')
+    if os.path.isfile(clay_js):
+        with open(clay_js, 'r') as f:
+            content = f.read()
+        dead_url = 'http://clay.pebble.com.s3-website-us-west-2.amazonaws.com/#'
+        if dead_url in content:
+            content = content.replace(dead_url, 'data:text/html;charset=utf-8,')
+            with open(clay_js, 'w') as f:
+                f.write(content)
     for subdir in ['include/pebble-clay', 'binaries']:
         # flint uses diorite's clay files
         src = os.path.join(clay_base, subdir, 'diorite')

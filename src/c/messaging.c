@@ -55,14 +55,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Weather_saveData();
   }
 
-  // does this message contain appointment data?
-  Tuple *apptTitle_tuple = dict_find(iterator, MESSAGE_KEY_ApptTitle);
-  Tuple *apptTime_tuple = dict_find(iterator, MESSAGE_KEY_ApptTime);
-
-  if(apptTitle_tuple != NULL && apptTime_tuple != NULL) {
-    Appointment_setData(apptTitle_tuple->value->cstring, apptTime_tuple->value->cstring);
-    Appointment_saveData();
-  }
+  // TODO: appointment data reception will be redesigned for queue-based protocol
 
   // does this message contain new config information?
   Tuple *timeColor_tuple = dict_find(iterator, MESSAGE_KEY_SettingColorTime);
@@ -251,7 +244,7 @@ void messaging_init(MessageProcessedCallback processed_callback) {
   app_message_register_inbox_received(inbox_received_callback);
 
   // Open AppMessage
-  app_message_open(512, 8);
+  app_message_open(1024, 64);
 
   // APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch messaging is started!");
 }
