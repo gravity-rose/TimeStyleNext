@@ -43,15 +43,24 @@ PLATFORM_SCRIPT = """<script>
   var CONFIGS_KEY = 'timestyle-saved-configs';
   var EDIT_NAME_KEY = 'timestyle-edit-name';
 
-  // When loading a saved config (Edit or Send), use the saved settings
-  // instead of the watch's current settings injected by the server.
-  var _loadFromLocal = localStorage.getItem(EDIT_NAME_KEY) ||
-                       localStorage.getItem('timestyle-auto-send');
-  if (_loadFromLocal) {
-    var _saved = localStorage.getItem('clay-settings');
-    if (_saved) {
-      try { window.claySettings = JSON.parse(_saved); } catch(e) {}
+  // When loading a saved config (Edit or Send), override window.claySettings.
+  // Clear flags immediately to prevent stale flags from breaking future loads.
+  try {
+    var _editFlag = localStorage.getItem(EDIT_NAME_KEY);
+    var _sendFlag = localStorage.getItem('timestyle-auto-send');
+    if (_editFlag || _sendFlag) {
+      var _saved = localStorage.getItem('clay-settings');
+      if (_saved) {
+        var _parsed = JSON.parse(_saved);
+        if (_parsed && typeof _parsed === 'object' && Object.keys(_parsed).length > 3) {
+          window.claySettings = _parsed;
+        }
+      }
     }
+  } catch(e) {
+    localStorage.removeItem(EDIT_NAME_KEY);
+    localStorage.removeItem('timestyle-auto-send');
+    localStorage.removeItem('clay-settings');
   }
 
   // --- Saved configs storage ---
@@ -82,29 +91,37 @@ PLATFORM_SCRIPT = """<script>
   }
 
   function serializeForm() {
-    var items = getConfigItems();
+    var manipulableTypes = ['select','toggle','color','input','slider'];
     var targets = document.querySelectorAll('.component-select [data-manipulator-target],' +
       '.component-toggle [data-manipulator-target],' +
       '.component-color [data-manipulator-target],' +
       '.component-input [data-manipulator-target],' +
       '.component-slider [data-manipulator-target]');
     var settings = {};
-    for (var i = 0; i < items.length && i < targets.length; i++) {
-      var item = items[i];
-      var el = targets[i];
-      switch (item.type) {
-        case 'select':
-          settings[item.messageKey] = el.value; break;
-        case 'toggle':
-          settings[item.messageKey] = el.checked; break;
-        case 'color':
-          settings[item.messageKey] = parseInt(el.dataset.value || el.value || '0', 10); break;
-        case 'input':
-          settings[item.messageKey] = el.value; break;
-        case 'slider':
-          settings[item.messageKey] = parseInt(el.value, 10); break;
-      }
-    }
+    var targetIdx = 0;
+
+    (window.clayConfig || []).forEach(function(entry) {
+      var items = entry.items || [entry];
+      items.forEach(function(item) {
+        if (manipulableTypes.indexOf(item.type) === -1) return;
+        if (targetIdx >= targets.length) return;
+        var el = targets[targetIdx++];
+        if (!item.messageKey) return;
+        switch (item.type) {
+          case 'select':
+            settings[item.messageKey] = el.value; break;
+          case 'toggle':
+            settings[item.messageKey] = el.checked; break;
+          case 'color':
+            var cv = parseInt(el.value, 10);
+            settings[item.messageKey] = isNaN(cv) ? 0 : cv; break;
+          case 'input':
+            settings[item.messageKey] = el.value; break;
+          case 'slider':
+            settings[item.messageKey] = parseInt(el.value, 10); break;
+        }
+      });
+    });
     return settings;
   }
 
@@ -141,9 +158,7 @@ PLATFORM_SCRIPT = """<script>
     return pos + ' - ' + colorName(settings.SettingColorBG) + ' / ' + colorName(settings.SettingColorSidebar);
   }
 
-  // --- Save config flow ---
-  // Saving routes through Clay's normal submit so serialization is correct.
-  // The name is stashed in localStorage; the /close? response page does the actual save.
+  // --- Save config flow (client-side only, does NOT send to watch) ---
   function doSaveConfig() {
     var editName = localStorage.getItem(EDIT_NAME_KEY) || '';
     var defaultName = editName || getDefaultConfigName();
@@ -154,11 +169,14 @@ PLATFORM_SCRIPT = """<script>
     var existing = configs.findIndex(function(c) { return c.name === name && c.platform === PLATFORM; });
     if (existing !== -1) {
       if (!confirm('A configuration named "' + name + '" already exists for ' + PLATFORM + '. Overwrite?')) return;
+      configs[existing].settings = serializeForm();
+      configs[existing].updated = Date.now();
+    } else {
+      configs.push({ name: name, platform: PLATFORM, settings: serializeForm(), created: Date.now() });
     }
-
-    localStorage.setItem('timestyle-pending-save', name);
+    saveConfigs(configs);
     localStorage.removeItem(EDIT_NAME_KEY);
-    document.querySelector('#main-form button[type=submit]').click();
+    alert('Configuration "' + name + '" saved.');
   }
 
   // --- Load config into Clay form ---
@@ -235,36 +253,36 @@ PLATFORM_SCRIPT = """<script>
     if (configs.length === 0) {
       html += '<p style="text-align:center;color:#999;padding:20px;">No saved configurations for ' + PLATFORM + '.</p>';
     } else {
-      configs.forEach(function(c) {
+      configs.forEach(function(c, idx) {
         var date = new Date(c.updated || c.created).toLocaleDateString();
-        var esc = c.name.replace(/\\\\/g,'\\\\\\\\').replace(/'/g,"\\\\'");
         html += '<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:14px;margin:10px 0;">' +
           '<div style="font-weight:bold;font-size:15px;color:#222;margin-bottom:4px;">' + c.name.replace(/</g,'&lt;') + '</div>' +
           '<div style="font-size:12px;color:#888;margin-bottom:10px;">' + date + '</div>' +
           '<div style="display:flex;gap:6px;">' +
-          '<button onclick="window._tsEditConfig(\\'' + esc + '\\')" ' +
+          '<button data-action="edit" data-idx="' + idx + '" ' +
             'style="flex:2;padding:8px;border:none;border-radius:4px;background:#4a90d9;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Edit</button>' +
-          '<button onclick="window._tsSendConfig(\\'' + esc + '\\')" ' +
+          '<button data-action="send" data-idx="' + idx + '" ' +
             'style="flex:2;padding:8px;border:none;border-radius:4px;background:#5cb85c;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Send</button>' +
-          '<button onclick="window._tsDeleteConfig(\\'' + esc + '\\')" ' +
+          '<button data-action="delete" data-idx="' + idx + '" ' +
             'style="flex:1;padding:8px;border:none;border-radius:4px;background:#d9534f;color:#fff;cursor:pointer;font-weight:bold;font-size:13px;min-width:0;">Del</button>' +
           '</div></div>';
       });
     }
     configsPage.innerHTML = html;
+
+    configsPage.querySelectorAll('[data-action]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var configs = getPlatformConfigs();
+        var config = configs[parseInt(btn.dataset.idx, 10)];
+        if (!config) return;
+        if (btn.dataset.action === 'edit') loadConfigIntoForm(config);
+        else if (btn.dataset.action === 'send') sendConfigToWatch(config);
+        else if (btn.dataset.action === 'delete') deleteConfig(config.name);
+      });
+    });
   }
 
-  // --- Global handlers for inline onclick ---
-  window._tsEditConfig = function(name) {
-    var config = loadConfigs().find(function(c) { return c.name === name && c.platform === PLATFORM; });
-    if (config) loadConfigIntoForm(config);
-  };
-  window._tsSendConfig = function(name) {
-    var config = loadConfigs().find(function(c) { return c.name === name && c.platform === PLATFORM; });
-    if (config) sendConfigToWatch(config);
-  };
-  window._tsDeleteConfig = function(name) { deleteConfig(name); };
-  window._tsSwitchTab = function(tab) { switchTab(tab); };
+  // (config list buttons use addEventListener via data-action attributes)
 
   // --- Apply platform tweaks and add buttons ---
   function applyTweaks() {
@@ -349,79 +367,53 @@ def forward_to_emulator(query):
             ['pebble', 'emu-app-config', '--emulator', platform, '--file', '/dev/null'],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        time.sleep(2)
+        time.sleep(3)
 
-        import socket
-        # find the port this process is listening on
         port = None
         try:
             out = subprocess.check_output(
                 ['ss', '-tlnp'], stderr=subprocess.DEVNULL
             ).decode()
             for line in out.splitlines():
-                if f'pid={proc.pid}' in line:
+                if f'pid={proc.pid}' in line and 'pebble' in line:
                     import re
                     m = re.search(r':(\d+)\s', line)
                     if m:
                         port = m.group(1)
                         break
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Port detection failed: {e}")
 
         if port:
             import urllib.request
             fwd = f'http://localhost:{port}/close?{query}'
-            urllib.request.urlopen(fwd, timeout=5)
-            print(f"Settings forwarded to emulator via port {port}")
+            sys.stderr.write(f"Forwarding to emulator at port {port}...\n")
+            urllib.request.urlopen(fwd, timeout=10)
+            sys.stderr.write(f"Settings forwarded OK\n")
         else:
-            print("Could not find emu-app-config callback port")
+            sys.stderr.write(f"Could not find emu-app-config port (pid={proc.pid})\n")
+            try:
+                out = subprocess.check_output(['ss', '-tlnp'], stderr=subprocess.DEVNULL).decode()
+                sys.stderr.write(f"Listening sockets:\n{out}\n")
+            except Exception:
+                pass
             proc.kill()
     except Exception as e:
-        print(f"Forward failed: {e}")
+        sys.stderr.write(f"Forward failed: {e}\n")
 
 
 class ConfigHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/close?'):
             query = self.path[len('/close?'):]
+            sys.stderr.write(f"Received settings ({len(query)} chars)\n")
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-
-            try:
-                settings_json = json.dumps(json.loads(urllib.parse.unquote(query)))
-            except Exception:
-                settings_json = '{}'
-
-            save_script = f'''<script>
-(function() {{
-  var CONFIGS_KEY = 'timestyle-saved-configs';
-  var PLATFORM = '{platform}';
-  var pendingName = localStorage.getItem('timestyle-pending-save');
-  if (pendingName) {{
-    localStorage.removeItem('timestyle-pending-save');
-    var settings = {settings_json};
-    var configs = [];
-    try {{ configs = JSON.parse(localStorage.getItem(CONFIGS_KEY)) || []; }} catch(e) {{}}
-    var idx = configs.findIndex(function(c) {{ return c.name === pendingName && c.platform === PLATFORM; }});
-    if (idx !== -1) {{
-      configs[idx].settings = settings;
-      configs[idx].updated = Date.now();
-    }} else {{
-      configs.push({{ name: pendingName, platform: PLATFORM, settings: settings, created: Date.now() }});
-    }}
-    localStorage.setItem(CONFIGS_KEY, JSON.stringify(configs));
-    document.getElementById('msg').textContent = 'Settings sent & configuration "' + pendingName + '" saved.';
-  }}
-}})();
-</script>'''
-
-            self.wfile.write(b'<html><body>'
-                            b'<h2 id="msg">Settings sent to watch.</h2>'
-                            b'<p>Check the emulator.</p>'
-                            + save_script.encode() +
-                            b'</body></html>')
+            self.wfile.write(b'<html><body><h2>Settings sent to watch.</h2>'
+                             b'<p>Check the emulator.</p>'
+                             b'</body></html>')
 
             threading.Thread(target=forward_to_emulator, args=(query,), daemon=True).start()
         else:
@@ -431,12 +423,11 @@ class ConfigHandler(http.server.BaseHTTPRequestHandler):
             page = page.replace('$$$RETURN_TO$$$',
                                 f'http://localhost:{port}/close?')
 
-            watch_settings = load_watch_settings()
-            if watch_settings:
-                settings_script = f'<script>window.claySettings={json.dumps(watch_settings)};</script>'
-                page = page.replace('</head>', settings_script + PLATFORM_SCRIPT + '</head>')
-            else:
-                page = page.replace('</head>', PLATFORM_SCRIPT + '</head>')
+            #watch_settings = load_watch_settings()
+            #if watch_settings:
+            #    page = page.replace('window.claySettings={}',
+            #                        f'window.claySettings={json.dumps(watch_settings)}')
+            page = page.replace('</head>', PLATFORM_SCRIPT + '</head>')
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
