@@ -423,10 +423,10 @@ class ConfigHandler(http.server.BaseHTTPRequestHandler):
             page = page.replace('$$$RETURN_TO$$$',
                                 f'http://localhost:{port}/close?')
 
-            #watch_settings = load_watch_settings()
-            #if watch_settings:
-            #    page = page.replace('window.claySettings={}',
-            #                        f'window.claySettings={json.dumps(watch_settings)}')
+            watch_settings = load_watch_settings()
+            if watch_settings:
+                page = page.replace('window.claySettings={}',
+                                    f'window.claySettings={json.dumps(watch_settings)}')
             page = page.replace('</head>', PLATFORM_SCRIPT + '</head>')
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
