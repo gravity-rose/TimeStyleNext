@@ -104,7 +104,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
 
   if(sidebarTextColor_tuple != NULL) {
-    // text can only be black or white, so we'll enforce that here
     settings.sidebarTextColor = GColorFromHEX(sidebarTextColor_tuple->value->int32);
   }
 

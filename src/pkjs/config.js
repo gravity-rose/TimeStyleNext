@@ -19,8 +19,7 @@ module.exports = [
         "messageKey": "SettingColorTime",
         "defaultValue": "0xFFFFFF",
         "label": "Time Color",
-        "sunlight": true,
-        "layout": "BLACK_WHITE"
+        "sunlight": true
       },
       {
         "type": "color",
@@ -41,8 +40,7 @@ module.exports = [
         "messageKey": "SettingSidebarTextColor",
         "defaultValue": "0x000000",
         "label": "Sidebar Text Color",
-        "sunlight": true,
-        "layout": "BLACK_WHITE"
+        "sunlight": true
       }
     ]
   },
