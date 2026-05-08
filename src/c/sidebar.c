@@ -49,6 +49,10 @@ static bool isAutoBatteryShown(void) {
 }
 
 #ifdef PBL_ROUND
+static bool isLargeRound(void) {
+  return screen_rect.size.w > 200;
+}
+
 // returns the best candidate widget for replacement by the auto battery
 // or the disconnection icon
 static int getReplacableWidget(void) {
@@ -58,13 +62,22 @@ static int getReplacableWidget(void) {
     return 2;
   }
 
+  if(isLargeRound()) {
+    if(settings.widgets[1] == EMPTY) return 1;
+    if(settings.widgets[3] == EMPTY) return 3;
+  }
+
   if(settings.widgets[0] == WEATHER_CURRENT || settings.widgets[0] == WEATHER_FORECAST_TODAY) {
     return 0;
   } else if(settings.widgets[2] == WEATHER_CURRENT || settings.widgets[2] == WEATHER_FORECAST_TODAY) {
     return 2;
   }
 
-  // if we don't have any of those things, just replace the left widget
+  if(isLargeRound()) {
+    if(settings.widgets[1] == WEATHER_CURRENT || settings.widgets[1] == WEATHER_FORECAST_TODAY) return 1;
+    if(settings.widgets[3] == WEATHER_CURRENT || settings.widgets[3] == WEATHER_FORECAST_TODAY) return 3;
+  }
+
   return 0;
 }
 #else
@@ -155,58 +168,108 @@ static void updateRoundSidebarRight(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  SidebarWidget widget = getRoundSidebarWidget(2);
+  if(isLargeRound()) {
+    SidebarWidget w2 = getRoundSidebarWidget(2);
+    SidebarWidget w3 = getRoundSidebarWidget(3);
 
-  // calculate center position of the widget
-  int widgetYPosition = bgBounds.size.h / 4 - widget.getHeight() / 2;
+    graphics_context_set_fill_color(ctx, settings.sidebarColor);
+    graphics_fill_radial(ctx, bgBounds, GOvalScaleModeFillCircle, 100, DEG_TO_TRIGANGLE(0), TRIG_MAX_ANGLE);
+    graphics_context_set_text_color(ctx, settings.sidebarTextColor);
+    SidebarWidgets_xOffset = 3;
 
-  drawRoundSidebar(ctx, bgBounds, widget, 0, widgetYPosition, 3);
+    int upperY = 2 * bounds.size.h / 5 - w2.getHeight() / 2;
+    int lowerY = 3 * bounds.size.h / 5 - w3.getHeight() / 2;
+
+    w2.draw(ctx, 0, upperY);
+    w3.draw(ctx, 0, lowerY);
+  } else {
+    SidebarWidget widget = getRoundSidebarWidget(2);
+    int widgetYPosition = bgBounds.size.h / 4 - widget.getHeight() / 2;
+    drawRoundSidebar(ctx, bgBounds, widget, 0, widgetYPosition, 3);
+  }
 }
 
 static void updateRoundSidebarLeft(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x - bounds.size.h * 2 + bounds.size.w, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  SidebarWidget widget = getRoundSidebarWidget(0);
+  if(isLargeRound()) {
+    SidebarWidget w0 = getRoundSidebarWidget(0);
+    SidebarWidget w1 = getRoundSidebarWidget(1);
 
-  // calculate center position of the widget
-  int widgetYPosition = bgBounds.size.h / 4 - widget.getHeight() / 2;
+    graphics_context_set_fill_color(ctx, settings.sidebarColor);
+    graphics_fill_radial(ctx, bgBounds, GOvalScaleModeFillCircle, 100, DEG_TO_TRIGANGLE(0), TRIG_MAX_ANGLE);
+    graphics_context_set_text_color(ctx, settings.sidebarTextColor);
+    SidebarWidgets_xOffset = 7;
 
-  drawRoundSidebar(ctx, bgBounds, widget, 0, widgetYPosition, 7);
+    int upperY = 2 * bounds.size.h / 5 - w0.getHeight() / 2;
+    int lowerY = 3 * bounds.size.h / 5 - w1.getHeight() / 2;
+
+    w0.draw(ctx, 0, upperY);
+    w1.draw(ctx, 0, lowerY);
+  } else {
+    SidebarWidget widget = getRoundSidebarWidget(0);
+    int widgetYPosition = bgBounds.size.h / 4 - widget.getHeight() / 2;
+    drawRoundSidebar(ctx, bgBounds, widget, 0, widgetYPosition, 7);
+  }
 }
 
 static void updateRoundSidebarBottom(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.size.w / -2, bounds.origin.y, bounds.size.w * 2, bounds.size.w * 2);
 
-  SidebarWidget widget = getRoundSidebarWidget(2);
-
-  // use compact mode and fixed height for bottom and top widget
   SidebarWidgets_useCompactMode = true;
   SidebarWidgets_fixedHeight = true;
 
-  // calculate center position of the widget
-  int widgetXPosition = bgBounds.size.w / 4 - ACTION_BAR_WIDTH / 2;
-  int widgetYPosition = (horizontal_bar_height - widget.getHeight()) / 2;
+  if(isLargeRound()) {
+    SidebarWidget w2 = getRoundSidebarWidget(2);
+    SidebarWidget w3 = getRoundSidebarWidget(3);
 
-  drawRoundSidebar(ctx, bgBounds, widget, widgetXPosition, widgetYPosition, 5);
+    graphics_context_set_fill_color(ctx, settings.sidebarColor);
+    graphics_fill_radial(ctx, bgBounds, GOvalScaleModeFillCircle, 100, DEG_TO_TRIGANGLE(0), TRIG_MAX_ANGLE);
+    graphics_context_set_text_color(ctx, settings.sidebarTextColor);
+    SidebarWidgets_xOffset = 5;
+
+    int leftX = 3 * bounds.size.w / 8 - ACTION_BAR_WIDTH / 2;
+    int rightX = 5 * bounds.size.w / 8 - ACTION_BAR_WIDTH / 2;
+
+    w2.draw(ctx, leftX, (horizontal_bar_height - w2.getHeight()) / 2);
+    w3.draw(ctx, rightX, (horizontal_bar_height - w3.getHeight()) / 2);
+  } else {
+    SidebarWidget widget = getRoundSidebarWidget(2);
+    int widgetXPosition = bgBounds.size.w / 4 - ACTION_BAR_WIDTH / 2;
+    int widgetYPosition = (horizontal_bar_height - widget.getHeight()) / 2;
+    drawRoundSidebar(ctx, bgBounds, widget, widgetXPosition, widgetYPosition, 5);
+  }
 }
 
 static void updateRoundSidebarTop(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.size.w / -2, bounds.origin.y - bounds.size.w * 2 + bounds.size.h, bounds.size.w * 2, bounds.size.w * 2);
 
-  SidebarWidget widget = getRoundSidebarWidget(0);
-
-  // use compact mode and fixed height for bottom and top widget
   SidebarWidgets_useCompactMode = true;
   SidebarWidgets_fixedHeight = true;
 
-  // calculate center position of the widget
-  int widgetXPosition = bgBounds.size.w / 4 - ACTION_BAR_WIDTH / 2;
-  int widgetYPosition = (horizontal_bar_height - widget.getHeight()) / 2;
+  if(isLargeRound()) {
+    SidebarWidget w0 = getRoundSidebarWidget(0);
+    SidebarWidget w1 = getRoundSidebarWidget(1);
 
-  drawRoundSidebar(ctx, bgBounds, widget, widgetXPosition, widgetYPosition, 5);
+    graphics_context_set_fill_color(ctx, settings.sidebarColor);
+    graphics_fill_radial(ctx, bgBounds, GOvalScaleModeFillCircle, 100, DEG_TO_TRIGANGLE(0), TRIG_MAX_ANGLE);
+    graphics_context_set_text_color(ctx, settings.sidebarTextColor);
+    SidebarWidgets_xOffset = 5;
+
+    int leftX = 3 * bounds.size.w / 8 - ACTION_BAR_WIDTH / 2;
+    int rightX = 5 * bounds.size.w / 8 - ACTION_BAR_WIDTH / 2;
+
+    w0.draw(ctx, leftX, (horizontal_bar_height - w0.getHeight()) / 2);
+    w1.draw(ctx, rightX, (horizontal_bar_height - w1.getHeight()) / 2);
+  } else {
+    SidebarWidget widget = getRoundSidebarWidget(0);
+    int widgetXPosition = bgBounds.size.w / 4 - ACTION_BAR_WIDTH / 2;
+    int widgetYPosition = (horizontal_bar_height - widget.getHeight()) / 2;
+    drawRoundSidebar(ctx, bgBounds, widget, widgetXPosition, widgetYPosition, 5);
+  }
 }
 
 static void updateRoundSidebar1(Layer *l, GContext* ctx) {
@@ -267,9 +330,7 @@ static void updateRectSidebar(Layer *l, GContext* ctx) {
   displayWidgets[0] = getSidebarWidgetByType(settings.widgets[0]);
   displayWidgets[1] = getSidebarWidgetByType(settings.widgets[1]);
   displayWidgets[2] = getSidebarWidgetByType(settings.widgets[2]);
-  if(settings.sidebarLocation == BOTTOM || settings.sidebarLocation == TOP) {
-    displayWidgets[3] = getSidebarWidgetByType(settings.widgets[3]);
-  }
+  displayWidgets[3] = getSidebarWidgetByType(settings.widgets[3]);
 
   // do we need to replace a widget?
   // if so, determine which widget should be replaced
@@ -335,33 +396,42 @@ static void updateRectSidebar(Layer *l, GContext* ctx) {
   } else if(settings.sidebarLocation == LEFT || settings.sidebarLocation == RIGHT) {
     GRect unobstructed_bounds = layer_get_unobstructed_bounds(l);
 
-    // if the widgets are too tall, enable "compact mode"
     int compact_mode_threshold = unobstructed_bounds.size.h - V_PADDING_DEFAULT * 2 - 3;
     v_padding = V_PADDING_DEFAULT;
 
-    SidebarWidgets_useCompactMode = false; // ensure that we compare the non-compacted heights
+    int numWidgets = (screen_rect.size.h > 200) ? 4 : 3;
+
+    SidebarWidgets_useCompactMode = false;
     SidebarWidgets_fixedHeight = false;
     int totalHeight = displayWidgets[0].getHeight() + displayWidgets[1].getHeight() + displayWidgets[2].getHeight();
+    if(numWidgets == 4) totalHeight += displayWidgets[3].getHeight();
     SidebarWidgets_useCompactMode = (totalHeight > compact_mode_threshold);
-    // printf("Total Height: %i, Threshold: %i", totalHeight, compact_mode_threshold);
 
-    // now that they have been compacted, check if they fit a second time,
-    // if they still don't fit, we can reduce padding
     totalHeight = displayWidgets[0].getHeight() + displayWidgets[1].getHeight() + displayWidgets[2].getHeight();
+    if(numWidgets == 4) totalHeight += displayWidgets[3].getHeight();
 
     if(totalHeight > compact_mode_threshold) {
       v_padding = V_PADDING_COMPACT;
     }
 
-    // draw the widgets
-    int lowerWidgetPos = unobstructed_bounds.size.h - v_padding - displayWidgets[2].getHeight();
-    displayWidgets[0].draw(ctx, 0, v_padding);
+    if(numWidgets == 4) {
+      int availH = unobstructed_bounds.size.h - 2 * v_padding;
+      int gap = (availH - totalHeight) / 3;
 
-    // vertically center the middle widget using MATH
-    middleWidgetPos = ((lowerWidgetPos - displayWidgets[1].getHeight()) + (v_padding + displayWidgets[0].getHeight())) / 2;
-    displayWidgets[1].draw(ctx, 0, middleWidgetPos);
+      int yPos = v_padding;
+      for(int i = 0; i < 4; i++) {
+        displayWidgets[i].draw(ctx, 0, yPos);
+        yPos += displayWidgets[i].getHeight() + gap;
+      }
+    } else {
+      int lowerWidgetPos = unobstructed_bounds.size.h - v_padding - displayWidgets[2].getHeight();
+      displayWidgets[0].draw(ctx, 0, v_padding);
 
-    displayWidgets[2].draw(ctx, 0, lowerWidgetPos);
+      middleWidgetPos = ((lowerWidgetPos - displayWidgets[1].getHeight()) + (v_padding + displayWidgets[0].getHeight())) / 2;
+      displayWidgets[1].draw(ctx, 0, middleWidgetPos);
+
+      displayWidgets[2].draw(ctx, 0, lowerWidgetPos);
+    }
   }
 }
 #endif

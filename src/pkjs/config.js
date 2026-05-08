@@ -3,7 +3,7 @@
 module.exports = [
   {
     "type": "heading",
-    "defaultValue": "TimeStyle BB"
+    "defaultValue": "TimeStyle Next"
   },
 
   // Colors
