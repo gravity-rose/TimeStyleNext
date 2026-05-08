@@ -43,6 +43,53 @@ PLATFORM_SCRIPT = """<script>
   var CONFIGS_KEY = 'timestyle-saved-configs';
   var EDIT_NAME_KEY = 'timestyle-edit-name';
 
+  var PRESET_DEFAULTS = {
+    SettingColorBG: 0x000000,
+    SettingSidebarTextColor: 0x000000,
+    SettingClockFontId: '0',
+    SettingShowLeadingZero: false,
+    SettingCenterTime: false,
+    SettingSidebarPosition: '3',
+    SettingUseLargeFonts: false,
+    SettingWidget0ID: '2',
+    SettingWidget1ID: '7',
+    SettingWidget2ID: '10',
+    SettingWidget3ID: '6',
+    SettingDisconnectIcon: true,
+    SettingBluetoothVibe: false,
+    SettingHourlyVibe: '0',
+    SettingUseMetric: true,
+    SettingShowBatteryPct: true,
+    SettingDisableAutobattery: false,
+    SettingHealthActivityDisplay: '0',
+    SettingHealthUseRestfulSleep: false,
+    SettingDecimalSep: '.',
+    SettingAltClockName: 'ALT',
+    SettingAltClockOffset: 0,
+    SettingLanguageID: '0',
+    SettingShowNextAppt: true
+  };
+  function makePreset(name, timeColor, sidebarColor) {
+    var s = JSON.parse(JSON.stringify(PRESET_DEFAULTS));
+    s.SettingColorTime = timeColor;
+    s.SettingColorSidebar = sidebarColor;
+    return { name: name, settings: s };
+  }
+  var STANDARD_CONFIGS = [
+    makePreset('Orange Dreams', 0xFF5500, 0xFF5500),
+    makePreset('Blue Screen', 0x00FFFF, 0x00FFFF),
+    makePreset('Timeline-Past', 0xFFFFFF, 0xFFAAAA),
+    makePreset('Terminal Green', 0x00FF00, 0x00FF00),
+    makePreset('Ultra Violet', 0xAA55FF, 0xAA55FF),
+    makePreset('Dark Past', 0xFF0000, 0xFFAAAA),
+    makePreset('Pretty in Pink', 0xFF55AA, 0xFF55AA),
+    makePreset('Red Velvet', 0xFF0000, 0xFF0000),
+    makePreset('Lime', 0xFFFFFF, 0x55FF00)
+  ];
+  function isStandardName(name) {
+    return STANDARD_CONFIGS.some(function(c) { return c.name === name; });
+  }
+
   // When loading a saved config (Edit or Send), override window.claySettings.
   // Clear flags immediately to prevent stale flags from breaking future loads.
   try {
@@ -70,9 +117,6 @@ PLATFORM_SCRIPT = """<script>
   }
   function saveConfigs(configs) {
     localStorage.setItem(CONFIGS_KEY, JSON.stringify(configs));
-  }
-  function getPlatformConfigs() {
-    return loadConfigs().filter(function(c) { return c.platform === PLATFORM; });
   }
 
   // --- Serialize current form state ---
@@ -165,14 +209,19 @@ PLATFORM_SCRIPT = """<script>
     var name = prompt('Configuration name:', defaultName);
     if (!name) return;
 
+    if (isStandardName(name)) {
+      alert('Cannot overwrite standard preset "' + name + '". Choose a different name.');
+      return;
+    }
+
     var configs = loadConfigs();
-    var existing = configs.findIndex(function(c) { return c.name === name && c.platform === PLATFORM; });
+    var existing = configs.findIndex(function(c) { return c.name === name; });
     if (existing !== -1) {
-      if (!confirm('A configuration named "' + name + '" already exists for ' + PLATFORM + '. Overwrite?')) return;
+      if (!confirm('A configuration named "' + name + '" already exists. Overwrite?')) return;
       configs[existing].settings = serializeForm();
       configs[existing].updated = Date.now();
     } else {
-      configs.push({ name: name, platform: PLATFORM, settings: serializeForm(), created: Date.now() });
+      configs.push({ name: name, settings: serializeForm(), created: Date.now() });
     }
     saveConfigs(configs);
     localStorage.removeItem(EDIT_NAME_KEY);
@@ -196,7 +245,7 @@ PLATFORM_SCRIPT = """<script>
   // --- Delete config ---
   function deleteConfig(name) {
     if (!confirm('Delete configuration "' + name + '"?')) return;
-    var configs = loadConfigs().filter(function(c) { return !(c.name === name && c.platform === PLATFORM); });
+    var configs = loadConfigs().filter(function(c) { return c.name !== name; });
     saveConfigs(configs);
     renderConfigsList();
   }
@@ -246,34 +295,44 @@ PLATFORM_SCRIPT = """<script>
   }
 
   // --- Configs list page ---
-  function renderConfigsList() {
-    var configs = getPlatformConfigs();
-    var html = '<p style="text-align:center;color:#666;font-size:13px;margin:8px 0;">Platform: ' + PLATFORM + '</p>';
+  function renderConfigCard(c, source, idx, showDelete) {
+    var html = '<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:14px;margin:10px 0;">' +
+      '<div style="font-weight:bold;font-size:15px;color:#222;margin-bottom:8px;">' + c.name.replace(/</g,'&lt;') + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+      '<button data-action="edit" data-source="' + source + '" data-idx="' + idx + '" ' +
+        'style="flex:2;padding:8px;border:none;border-radius:4px;background:#4a90d9;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Edit</button>' +
+      '<button data-action="send" data-source="' + source + '" data-idx="' + idx + '" ' +
+        'style="flex:2;padding:8px;border:none;border-radius:4px;background:#5cb85c;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Send</button>';
+    if (showDelete) {
+      html += '<button data-action="delete" data-source="' + source + '" data-idx="' + idx + '" ' +
+        'style="flex:1;padding:8px;border:none;border-radius:4px;background:#d9534f;color:#fff;cursor:pointer;font-weight:bold;font-size:13px;min-width:0;">Del</button>';
+    }
+    html += '</div></div>';
+    return html;
+  }
 
-    if (configs.length === 0) {
-      html += '<p style="text-align:center;color:#999;padding:20px;">No saved configurations for ' + PLATFORM + '.</p>';
-    } else {
-      configs.forEach(function(c, idx) {
-        var date = new Date(c.updated || c.created).toLocaleDateString();
-        html += '<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:14px;margin:10px 0;">' +
-          '<div style="font-weight:bold;font-size:15px;color:#222;margin-bottom:4px;">' + c.name.replace(/</g,'&lt;') + '</div>' +
-          '<div style="font-size:12px;color:#888;margin-bottom:10px;">' + date + '</div>' +
-          '<div style="display:flex;gap:6px;">' +
-          '<button data-action="edit" data-idx="' + idx + '" ' +
-            'style="flex:2;padding:8px;border:none;border-radius:4px;background:#4a90d9;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Edit</button>' +
-          '<button data-action="send" data-idx="' + idx + '" ' +
-            'style="flex:2;padding:8px;border:none;border-radius:4px;background:#5cb85c;color:#fff;cursor:pointer;font-size:13px;min-width:0;">Send</button>' +
-          '<button data-action="delete" data-idx="' + idx + '" ' +
-            'style="flex:1;padding:8px;border:none;border-radius:4px;background:#d9534f;color:#fff;cursor:pointer;font-weight:bold;font-size:13px;min-width:0;">Del</button>' +
-          '</div></div>';
+  function renderConfigsList() {
+    var userConfigs = loadConfigs();
+    var html = '<p style="font-weight:bold;font-size:14px;color:#555;margin:12px 0 4px 4px;">Presets</p>';
+
+    STANDARD_CONFIGS.forEach(function(c, idx) {
+      html += renderConfigCard(c, 'standard', idx, false);
+    });
+
+    if (userConfigs.length > 0) {
+      html += '<p style="font-weight:bold;font-size:14px;color:#555;margin:16px 0 4px 4px;">Your Configs</p>';
+      userConfigs.forEach(function(c, idx) {
+        html += renderConfigCard(c, 'user', idx, true);
       });
     }
+
     configsPage.innerHTML = html;
 
     configsPage.querySelectorAll('[data-action]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        var configs = getPlatformConfigs();
-        var config = configs[parseInt(btn.dataset.idx, 10)];
+        var source = btn.dataset.source;
+        var idx = parseInt(btn.dataset.idx, 10);
+        var config = source === 'standard' ? STANDARD_CONFIGS[idx] : loadConfigs()[idx];
         if (!config) return;
         if (btn.dataset.action === 'edit') loadConfigIntoForm(config);
         else if (btn.dataset.action === 'send') sendConfigToWatch(config);
@@ -360,46 +419,59 @@ PLATFORM_SCRIPT = """<script>
 </script>"""
 
 
+def kill_stale_emu_configs():
+    """Kill any leftover pebble emu-app-config processes."""
+    try:
+        out = subprocess.check_output(['pgrep', '-f', 'emu-app-config'],
+                                      stderr=subprocess.DEVNULL).decode()
+        for pid in out.strip().split('\n'):
+            if pid:
+                subprocess.run(['kill', pid], stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        pass
+
 def forward_to_emulator(query):
     """Spawn a fresh emu-app-config, then hit its callback port with the settings."""
+    import re, urllib.request
+    kill_stale_emu_configs()
+    proc = None
     try:
         proc = subprocess.Popen(
-            ['pebble', 'emu-app-config', '--emulator', platform, '--file', '/dev/null'],
+            ['pebble', 'emu-app-config', '--emulator', platform],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        time.sleep(3)
 
         port = None
-        try:
-            out = subprocess.check_output(
-                ['ss', '-tlnp'], stderr=subprocess.DEVNULL
-            ).decode()
-            for line in out.splitlines():
-                if f'pid={proc.pid}' in line and 'pebble' in line:
-                    import re
-                    m = re.search(r':(\d+)\s', line)
-                    if m:
-                        port = m.group(1)
-                        break
-        except Exception as e:
-            print(f"Port detection failed: {e}")
+        for attempt in range(20):
+            time.sleep(0.5)
+            try:
+                out = subprocess.check_output(
+                    ['ss', '-tlnp'], stderr=subprocess.DEVNULL
+                ).decode()
+                for line in out.splitlines():
+                    if f'pid={proc.pid}' in line and 'pebble' in line:
+                        m = re.search(r':(\d+)\s', line)
+                        if m:
+                            port = m.group(1)
+                            break
+            except Exception:
+                pass
+            if port:
+                break
 
         if port:
-            import urllib.request
             fwd = f'http://localhost:{port}/close?{query}'
             sys.stderr.write(f"Forwarding to emulator at port {port}...\n")
             urllib.request.urlopen(fwd, timeout=10)
             sys.stderr.write(f"Settings forwarded OK\n")
+            time.sleep(1)
         else:
             sys.stderr.write(f"Could not find emu-app-config port (pid={proc.pid})\n")
-            try:
-                out = subprocess.check_output(['ss', '-tlnp'], stderr=subprocess.DEVNULL).decode()
-                sys.stderr.write(f"Listening sockets:\n{out}\n")
-            except Exception:
-                pass
-            proc.kill()
     except Exception as e:
         sys.stderr.write(f"Forward failed: {e}\n")
+    finally:
+        if proc:
+            proc.kill()
 
 
 class ConfigHandler(http.server.BaseHTTPRequestHandler):
