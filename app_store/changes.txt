@@ -1,0 +1,70 @@
+TimeStyle Next — Changes from upstream fork (plarus/TimeStyleBBPebble)
+======================================================================
+
+New Features
+------------
+- Next Appointment Bar: compact bar on the opposite edge from the widget
+  bar showing your next calendar event with reminder. Top/bottom bar
+  modes only. Fetches events from an iCal URL configured in settings.
+
+- Open-Meteo Weather: replaced OpenWeatherMap and Weather Underground
+  with Open-Meteo (https://open-meteo.com/), a free API requiring no
+  API key.
+
+- UV Index Widget: new sidebar widget showing current UV index from
+  Open-Meteo.
+
+- 9 Built-in Color Presets: Orange Dreams, Blue Screen, Timeline-Past,
+  Terminal Green, Ultra Violet, Dark Past, Pretty in Pink, Red Velvet,
+  and Lime. All set to bottom widget bar with calendar enabled.
+  Read-only — cannot be overwritten or deleted.
+
+- Saved Configurations: save, load, edit, send, and delete custom
+  watch configs by name. Persists across config page opens via
+  Close & Save flow. Works on both emulator and real hardware.
+
+- Full Color Palette: time color and sidebar text color now support all
+  64 Pebble colors (previously restricted to black/white).
+
+- Close & Save: close the config page and persist saved configs without
+  changing watch settings.
+
+Platform Support
+----------------
+- Flint (144x168, B&W rectangular): new platform support.
+- Gabbro (260x260, color round): new platform support with dual-widget
+  bars (2 widgets per bar in horizontal mode).
+- Emery: proportionally scaled widget bar, dynamic sidebar width,
+  4-widget vertical layout, larger appointment bar font.
+
+Config Page
+-----------
+- Pebble Clay config framework (self-contained, no external HTML).
+- Tabbed interface: Edit Config / Saved Configs.
+- Platform-specific tweaks: calendar hidden on round, widget count
+  adjusted for small round (chalk), widget labels for large screens.
+- Config UI embedded in watchface PBW for real hardware deployment
+  (not emulator-only).
+- Removed platform-specific config filtering — any saved config works
+  on any platform.
+- Compact saved configs list with inline Edit/Send/Del buttons.
+
+Bug Fixes
+---------
+- Alt timezone offset now normalizes to UTC before applying offset,
+  fixing incorrect times in non-UTC locales.
+- B&W display fix: white bars with black text on Diorite/Flint instead
+  of dithered gray.
+- Fixed Clay settings handling and message key mapping.
+- Emulator config forwarding: polling-based port detection instead of
+  fixed sleep, stale process cleanup between forwards.
+
+Technical
+---------
+- New app UUID to distinguish from upstream TimeStyle.
+- Cleaner separation of persisted and runtime-computed settings with
+  compile-time size safety checks (256 byte max).
+- CC BY-NC-SA 4.0 license for new/modified code, MIT retained for
+  original upstream code.
+- Config server (config_server.py) for emulator development with
+  localStorage-based settings injection and emulator forwarding.
