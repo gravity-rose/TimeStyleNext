@@ -68,6 +68,7 @@ void Settings_loadDefaultsSettings(void) {
   settings.activateDisconnectIcon = true;
   settings.centerTime             = false;
   settings.showNextAppt           = true;
+  settings.apptPollMinutes        = 30;
 }
 
 /*

@@ -1,0 +1,16 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_launcher
+id calendar_account
+id calendar_checkbox
+id calendar_list
+id calendar_name
+id grant_permission_btn
+id permission_section
+layout activity_main
+layout item_calendar
+string app_name
+string description
+string grant_permission
+string permission_rationale
+style AppTheme

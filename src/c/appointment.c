@@ -5,42 +5,12 @@
 
 AppointmentQueue Appointment_queue;
 
-static void load_test_data(void) {
-  Appointment_clearQueue();
-
-  time_t now = time(NULL);
-  struct tm *local = localtime(&now);
-  local->tm_hour = 14;
-  local->tm_min = 45;
-  local->tm_sec = 0;
-  time_t base = mktime(local);
-
-  const char *titles[] = {
-    "Team Standup",
-    "Code Review",
-    "Design Sync",
-    "1:1 w/ Manager",
-    "Sprint Planning",
-    "Lunch Break",
-    "Architecture Review",
-    "Demo Prep",
-    "All Hands"
-  };
-
-  for(int i = 0; i < 9; i++) {
-    Appointment_addEvent(base + i * 15 * 60, titles[i]);
-  }
-}
-
 void Appointment_init(void) {
   if(persist_exists(APPT_PERSIST_KEY)) {
     persist_read_data(APPT_PERSIST_KEY, &Appointment_queue, sizeof(AppointmentQueue));
   } else {
     Appointment_clearQueue();
   }
-
-  // always load test data for now
-  load_test_data();
 }
 
 void Appointment_deinit(void) {

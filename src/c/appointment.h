@@ -3,7 +3,7 @@
 #pragma once
 #include <pebble.h>
 
-#define APPT_QUEUE_SIZE 24
+#define APPT_QUEUE_SIZE 6
 #define APPT_TITLE_MAX_LEN 32
 #define APPT_PERSIST_KEY 3
 #define APPT_STALE_SECONDS (5 * 60)

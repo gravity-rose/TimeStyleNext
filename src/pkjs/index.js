@@ -3,7 +3,6 @@
 var Clay = require('pebble-clay');
 var clayConfig = require('./config');
 var weather = require('./weather');
-var calendar = require('./calendar');
 var languages = require('./languages');
 var keys = require('message_keys');
 
@@ -310,9 +309,6 @@ Pebble.addEventListener('ready', function(e) {
     weather.updateWeather();
   }
 
-  if(window.localStorage.getItem('show_next_appt') === 'yes') {
-    calendar.updateCalendar();
-  }
 });
 
 Pebble.addEventListener('appmessage', function(msg) {
@@ -321,9 +317,6 @@ Pebble.addEventListener('appmessage', function(msg) {
   window.localStorage.setItem('disable_weather', 'no');
   weather.updateWeather();
 
-  if(window.localStorage.getItem('show_next_appt') === 'yes') {
-    calendar.updateCalendar();
-  }
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
@@ -437,8 +430,5 @@ Pebble.addEventListener('webviewclosed', function(e) {
 function triggerDataUpdates() {
   if(window.localStorage.getItem('disable_weather') != 'yes') {
     weather.updateWeather(true);
-  }
-  if(window.localStorage.getItem('show_next_appt') === 'yes') {
-    calendar.updateCalendar();
   }
 }

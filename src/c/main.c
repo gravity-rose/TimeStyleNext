@@ -25,6 +25,7 @@ static bool updatingEverySecond;
 
 // try to randomize when watches call the weather API
 static uint8_t weatherRefreshMinute;
+static uint8_t appointmentRefreshMinute;
 
 static void update_screen(void) {
   time_date_update();
@@ -49,6 +50,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if(!dynamicSettings.disableWeather) {
     if(tick_time->tm_min == weatherRefreshMinute && tick_time->tm_sec == 0) {
       messaging_requestNewWeatherData();
+    }
+  }
+
+  // periodically request appointment data from companion
+  if(settings.showNextAppt && tick_time->tm_sec == 0) {
+    uint8_t interval = settings.apptPollMinutes > 0 ? settings.apptPollMinutes : 30;
+    if((tick_time->tm_min + appointmentRefreshMinute) % interval == 0) {
+      messaging_requestAppointmentData();
     }
   }
 
@@ -162,8 +171,13 @@ static void bluetoothStateChanged(bool newConnectionState) {
   }
 
   // if the phone was disconnected and isn't anymore, update the data
-  if(!dynamicSettings.disableWeather && !isPhoneConnected && newConnectionState) {
-    messaging_requestNewWeatherData();
+  if(!isPhoneConnected && newConnectionState) {
+    if(!dynamicSettings.disableWeather) {
+      messaging_requestNewWeatherData();
+    }
+    if(settings.showNextAppt) {
+      messaging_requestAppointmentData();
+    }
   }
 
   isPhoneConnected = newConnectionState;
@@ -194,6 +208,7 @@ static void init(void) {
   srand(time(NULL));
 
   weatherRefreshMinute = rand() % 60;
+  appointmentRefreshMinute = rand() % 60;
 
   // init settings
   Settings_init();
@@ -206,6 +221,10 @@ static void init(void) {
 
   // init the messaging thing
   messaging_init(redrawScreen);
+
+  if(settings.showNextAppt) {
+    messaging_requestAppointmentData();
+  }
 
   // Create main Window element and assign to pointer
   mainWindow = window_create();

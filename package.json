@@ -70,8 +70,11 @@
       "SettingWidget2ID",
       "SettingWidget3ID",
       "SettingShowNextAppt",
-      "ApptTitle",
-      "ApptTime"
+      "SettingApptPollMinutes",
+      "RequestApptData",
+      "ApptCount",
+      "ApptStartTime[6]",
+      "ApptTitle[6]"
     ],
 
     "resources": {

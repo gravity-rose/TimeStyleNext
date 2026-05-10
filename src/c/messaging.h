@@ -4,4 +4,5 @@
 typedef void (*MessageProcessedCallback)(void);
 
 void messaging_requestNewWeatherData(void);
+void messaging_requestAppointmentData(void);
 void messaging_init(MessageProcessedCallback callback);

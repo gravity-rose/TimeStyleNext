@@ -55,7 +55,26 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Weather_saveData();
   }
 
-  // TODO: appointment data reception will be redesigned for queue-based protocol
+  Tuple *apptCount_tuple = dict_find(iterator, MESSAGE_KEY_ApptCount);
+  if(apptCount_tuple != NULL) {
+    Appointment_clearQueue();
+    int count = apptCount_tuple->value->uint8;
+    if(count > APPT_QUEUE_SIZE) count = APPT_QUEUE_SIZE;
+
+    for(int i = 0; i < count; i++) {
+      Tuple *startTime_tuple = dict_find(iterator, MESSAGE_KEY_ApptStartTime + i);
+      Tuple *title_tuple = dict_find(iterator, MESSAGE_KEY_ApptTitle + i);
+
+      if(startTime_tuple != NULL && title_tuple != NULL) {
+        Appointment_addEvent(
+          (time_t)startTime_tuple->value->int32,
+          title_tuple->value->cstring
+        );
+      }
+    }
+
+    Appointment_saveData();
+  }
 
   // does this message contain new config information?
   Tuple *timeColor_tuple = dict_find(iterator, MESSAGE_KEY_SettingColorTime);
@@ -90,6 +109,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *activateDisconnectIcon_tuple = dict_find(iterator, MESSAGE_KEY_SettingDisconnectIcon);
 
   Tuple *showNextAppt_tuple = dict_find(iterator, MESSAGE_KEY_SettingShowNextAppt);
+  Tuple *apptPollMinutes_tuple = dict_find(iterator, MESSAGE_KEY_SettingApptPollMinutes);
 
   if(timeColor_tuple != NULL) {
     settings.timeColor = GColorFromHEX(timeColor_tuple->value->int32);
@@ -193,6 +213,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
   if(showNextAppt_tuple != NULL) {
     settings.showNextAppt = (bool)showNextAppt_tuple->value->int8;
+    if(settings.showNextAppt) {
+      messaging_requestAppointmentData();
+    }
+  }
+
+  if(apptPollMinutes_tuple != NULL) {
+    settings.apptPollMinutes = apptPollMinutes_tuple->value->int8;
+    if(settings.apptPollMinutes < 5) settings.apptPollMinutes = 30;
   }
 
   // does this message contain new language information?
@@ -228,10 +256,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 }
 
 void messaging_requestNewWeatherData(void) {
-  // just send an empty message for now
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   dict_write_uint32(iter, 0, 0);
+  app_message_outbox_send();
+}
+
+void messaging_requestAppointmentData(void) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_uint8(iter, MESSAGE_KEY_RequestApptData, 1);
   app_message_outbox_send();
 }
 
@@ -243,7 +277,7 @@ void messaging_init(MessageProcessedCallback processed_callback) {
   app_message_register_inbox_received(inbox_received_callback);
 
   // Open AppMessage
-  app_message_open(1024, 64);
+  app_message_open(1024, 128);
 
   // APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch messaging is started!");
 }

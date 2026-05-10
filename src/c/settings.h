@@ -120,6 +120,7 @@ typedef struct {
 
   // appointment bar settings
   bool showNextAppt;
+  uint8_t apptPollMinutes;
 } Settings;
 
 typedef struct {

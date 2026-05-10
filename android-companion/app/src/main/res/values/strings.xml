@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TimeStyle Next Companion</string>
+    <string name="description">Select which calendars to show on your Pebble watchface. Only non-all-day busy events will appear. Your watch polls for updates at the interval set in the watchface settings.</string>
+    <string name="permission_rationale">This app needs access to your calendars to show upcoming events on your Pebble watchface. No data is sent to the internet — events are only sent directly to your watch.</string>
+    <string name="grant_permission">Grant Calendar Access</string>
+</resources>
